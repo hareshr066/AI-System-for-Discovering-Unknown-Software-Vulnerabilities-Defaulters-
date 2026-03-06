@@ -1,305 +1,662 @@
-import React from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import HoverTrail from '../components/HoverTrail';
-import { 
-  ShieldCheck, 
-  Zap, 
-  Code2, 
-  Cpu, 
-  Activity, 
-  AlertTriangle, 
-  Fingerprint, 
-  Lock, 
-  Server, 
-  GitBranch, 
-  Terminal,
-  Filter 
+import {
+  motion, useInView, AnimatePresence,
+  useScroll, useTransform, useSpring, useMotionValue
+} from 'framer-motion';
+import {
+  ShieldCheck, Code2, Cpu, Activity, AlertTriangle,
+  Bug, CheckCircle, UploadCloud, Eye, Zap, Lock, Network
 } from 'lucide-react';
+import './Home.css';
 
-const BackgroundParticles = () => {
+/* ─────────────────────────────────────────────────
+   ANIMATED COUNTER
+───────────────────────────────────────────────── */
+const AnimatedCounter = ({ end, label, suffix = '' }) => {
+  const [count, setCount] = useState(0);
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: '-80px' });
+
+  useEffect(() => {
+    if (!inView) return;
+    let start = null;
+    const duration = 2200;
+    const step = (ts) => {
+      if (!start) start = ts;
+      const p = Math.min((ts - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - p, 4);
+      setCount(Math.floor(ease * end));
+      if (p < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }, [inView, end]);
+
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {[...Array(30)].map((_, i) => (
-        <motion.div
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.8 }}
+      className="flex flex-col items-center px-6 py-8 w-full md:w-1/3"
+    >
+      <span className="text-6xl md:text-8xl font-black font-mono tracking-tighter"
+        style={{ background: 'linear-gradient(135deg, #00F3FF 0%, #BC13FE 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', filter: 'drop-shadow(0 0 20px rgba(0,243,255,0.5))' }}>
+        {count}{suffix}
+      </span>
+      <span className="mt-3 text-xs uppercase tracking-[0.25em] font-bold text-[#64748B]">{label}</span>
+    </motion.div>
+  );
+};
+
+/* ─────────────────────────────────────────────────
+   NEURAL NETWORK CANVAS (Scene 1 background)
+───────────────────────────────────────────────── */
+const NeuralCanvas = ({ mouseX, mouseY }) => {
+  const canvasRef = useRef(null);
+  const nodesRef = useRef([]);
+  const animRef = useRef(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    const resize = () => {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+    };
+    resize();
+    window.addEventListener('resize', resize);
+
+    // Generate nodes
+    const NODE_COUNT = 60;
+    nodesRef.current = Array.from({ length: NODE_COUNT }, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      vx: (Math.random() - 0.5) * 0.4,
+      vy: (Math.random() - 0.5) * 0.4,
+      r: Math.random() * 2 + 1,
+    }));
+
+    const draw = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const nodes = nodesRef.current;
+      const mx = (mouseX.get() / window.innerWidth) * canvas.width;
+      const my = (mouseY.get() / window.innerHeight) * canvas.height;
+
+      // Update positions with gentle mouse attraction
+      nodes.forEach(n => {
+        const dx = mx - n.x;
+        const dy = my - n.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 200) {
+          n.vx += (dx / dist) * 0.015;
+          n.vy += (dy / dist) * 0.015;
+        }
+        n.vx *= 0.99;
+        n.vy *= 0.99;
+        n.x += n.vx;
+        n.y += n.vy;
+        if (n.x < 0 || n.x > canvas.width) n.vx *= -1;
+        if (n.y < 0 || n.y > canvas.height) n.vy *= -1;
+      });
+
+      // Draw connections
+      nodes.forEach((a, i) => {
+        nodes.slice(i + 1).forEach(b => {
+          const d = Math.hypot(a.x - b.x, a.y - b.y);
+          if (d < 130) {
+            ctx.beginPath();
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+            const alpha = (1 - d / 130) * 0.35;
+            ctx.strokeStyle = `rgba(0, 243, 255, ${alpha})`;
+            ctx.lineWidth = 0.7;
+            ctx.stroke();
+          }
+        });
+      });
+
+      // Draw nodes
+      nodes.forEach(n => {
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(0, 243, 255, 0.8)';
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = '#00F3FF';
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      });
+
+      animRef.current = requestAnimationFrame(draw);
+    };
+
+    draw();
+    return () => {
+      cancelAnimationFrame(animRef.current);
+      window.removeEventListener('resize', resize);
+    };
+  }, [mouseX, mouseY]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className="absolute inset-0 w-full h-full pointer-events-none z-0"
+    />
+  );
+};
+
+/* ─────────────────────────────────────────────────
+   CINEMATIC BACKGROUND (Particles + Grid + Streaks)
+───────────────────────────────────────────────── */
+const CinematicBackground = ({ mouseX, mouseY }) => {
+  const glowX = useSpring(mouseX, { stiffness: 60, damping: 25 });
+  const glowY = useSpring(mouseY, { stiffness: 60, damping: 25 });
+  const moveX = useTransform(glowX, v => v - 400);
+  const moveY = useTransform(glowY, v => v - 400);
+
+  return (
+    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+      <div className="home-bg-grid" />
+      <div className="home-floor-grid" />
+
+      {/* Cursor Glow */}
+      <motion.div
+        className="absolute rounded-full mix-blend-screen pointer-events-none"
+        style={{
+          width: 800, height: 800,
+          x: moveX, y: moveY,
+          background: 'radial-gradient(circle, rgba(0,243,255,0.15) 0%, rgba(188,19,254,0.1) 40%, transparent 65%)',
+          filter: 'blur(80px)',
+        }}
+      />
+
+      {/* Ambient Orbs */}
+      <div className="absolute top-[-20%] left-[-15%] w-[55%] h-[55%] rounded-full bg-[#BC13FE] blur-[200px] opacity-[0.04]" />
+      <div className="absolute bottom-[-20%] right-[-15%] w-[55%] h-[55%] rounded-full bg-[#00F3FF] blur-[200px] opacity-[0.04]" />
+
+      {/* Rain streaks */}
+      {Array.from({ length: 8 }, (_, i) => (
+        <div
           key={i}
-          className="absolute rounded-full bg-indigo-500/20"
-          style={{
-            width: Math.random() * 6 + 2,
-            height: Math.random() * 6 + 2,
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
-          }}
-          animate={{
-            y: [0, Math.random() * -100 - 50],
-            opacity: [0, 0.8, 0],
-            scale: [1, Math.random() + 1, 1],
-          }}
-          transition={{
-            duration: Math.random() * 5 + 5,
-            repeat: Infinity,
-            ease: "linear",
-          }}
+          className="home-light-streak"
+          style={{ left: `${10 + i * 12}%`, animationDuration: `${3 + Math.random() * 4}s`, animationDelay: `${Math.random() * 5}s` }}
         />
       ))}
+
+      {/* Floating particles */}
+      {Array.from({ length: 35 }, (_, i) => (
+        <motion.div
+          key={i}
+          className="absolute rounded-full pointer-events-none"
+          style={{
+            width: Math.random() * 3 + 1,
+            height: Math.random() * 3 + 1,
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * 100}%`,
+            background: i % 3 === 0 ? '#00F3FF' : i % 2 === 0 ? '#BC13FE' : '#1e293b',
+            boxShadow: i % 3 === 0 ? '0 0 10px #00F3FF' : i % 2 === 0 ? '0 0 10px #BC13FE' : 'none',
+          }}
+          animate={{
+            y: [0, -(Math.random() * 200 + 80)],
+            opacity: [0, 0.7, 0],
+          }}
+          transition={{ duration: Math.random() * 12 + 8, repeat: Infinity, ease: 'linear', delay: Math.random() * 5 }}
+        />
+      ))}
+
+      {/* SVG Dot Network */}
+      <svg className="absolute inset-0 w-full h-full opacity-[0.03]">
+        <pattern id="hp-dots" x="0" y="0" width="80" height="80" patternUnits="userSpaceOnUse">
+          <circle cx="20" cy="20" r="1" fill="#00F3FF" />
+          <circle cx="60" cy="60" r="1" fill="#BC13FE" />
+          <line x1="20" y1="20" x2="60" y2="60" stroke="#00F3FF" strokeWidth="0.3" />
+        </pattern>
+        <rect x="0" y="0" width="100%" height="100%" fill="url(#hp-dots)" />
+      </svg>
     </div>
   );
 };
 
-const Section = ({ children, id, className = "" }) => (
-  <motion.section
-    id={id}
-    initial="hidden"
-    whileInView="visible"
-    viewport={{ once: true, margin: "-100px" }}
-    className={`w-full max-w-7xl mx-auto px-6 py-24 ${className}`}
+/* ─────────────────────────────────────────────────
+   HERO TYPEWRITER
+───────────────────────────────────────────────── */
+const HeroTypewriter = () => {
+  const prefix = 'Autonomous AI System for Discovering ';
+  const [display, setDisplay] = useState('');
+  const [done, setDone] = useState(false);
+
+  useEffect(() => {
+    let i = 0;
+    const id = setInterval(() => {
+      setDisplay(prefix.slice(0, i + 1));
+      i++;
+      if (i >= prefix.length) { clearInterval(id); setTimeout(() => setDone(true), 300); }
+    }, 38);
+    return () => clearInterval(id);
+  }, []);
+
+  return (
+    <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black tracking-tighter leading-[1.05] text-center max-w-6xl">
+      <span className="text-[#F3F4F6]">{display}</span>
+      {done && (
+        <motion.span className="home-glow-text"
+          initial={{ opacity: 0, scale: 0.6, filter: 'blur(12px)' }}
+          animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+          transition={{ duration: 0.9, type: 'spring', bounce: 0.4 }}>
+          Unknown
+        </motion.span>
+      )}
+      <br />
+      {done && (
+        <motion.span className="text-[#CBD5E1]"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.2 }}>
+          Software Vulnerabilities
+        </motion.span>
+      )}
+      {!done && <span className="home-typewriter-cursor" />}
+    </h1>
+  );
+};
+
+/* ─────────────────────────────────────────────────
+   RIPPLE BUTTON
+───────────────────────────────────────────────── */
+const RippleButton = ({ to, className, icon: Icon, text, uploadArrow }) => {
+  const [ripples, setRipples] = useState([]);
+  const onDown = useCallback((e) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    setRipples(prev => [...prev, { x: e.clientX - r.left, y: e.clientY - r.top, id: Date.now() }]);
+  }, []);
+  return (
+    <Link to={to} className={className} onMouseDown={onDown}>
+      {Icon && <Icon className={`w-5 h-5 z-10 relative ${uploadArrow ? 'home-btn-upload-arrow' : ''}`} />}
+      <span className="z-10 relative">{text}</span>
+      <AnimatePresence>
+        {ripples.map(rp => (
+          <motion.span key={rp.id}
+            initial={{ scale: 0, opacity: 0.5 }}
+            animate={{ scale: 18, opacity: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.7 }}
+            onAnimationComplete={() => setRipples(p => p.filter(x => x.id !== rp.id))}
+            className="absolute rounded-full pointer-events-none z-0"
+            style={{ width: 20, height: 20, top: rp.y - 10, left: rp.x - 10, background: 'rgba(0,243,255,0.4)' }}
+          />
+        ))}
+      </AnimatePresence>
+    </Link>
+  );
+};
+
+/* ─────────────────────────────────────────────────
+   SECTION WRAPPER (fade-up on enter)
+───────────────────────────────────────────────── */
+const Scene = ({ children, id, className = '' }) => (
+  <motion.section id={id}
+    initial={{ opacity: 0, y: 60 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true, margin: '-80px' }}
+    transition={{ duration: 0.9, ease: 'easeOut' }}
+    className={`home-section max-w-7xl mx-auto w-full z-20 ${className}`}
   >
     {children}
   </motion.section>
 );
 
+/* ─────────────────────────────────────────────────
+   MAIN HOME COMPONENT
+───────────────────────────────────────────────── */
 const Home = () => {
-  const fadeUp = {
-    hidden: { opacity: 0, y: 40 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } },
-  };
+  // Mouse tracker
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  useEffect(() => {
+    const mv = (e) => { mouseX.set(e.clientX); mouseY.set(e.clientY); };
+    window.addEventListener('mousemove', mv);
+    return () => window.removeEventListener('mousemove', mv);
+  }, [mouseX, mouseY]);
 
-  const stagger = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.2 },
-    },
-  };
+  // Hero parallax
+  const heroRef = useRef(null);
+  const { scrollYProgress: heroScroll } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
+  const heroY = useTransform(heroScroll, [0, 1], [0, 200]);
+  const heroOpacity = useTransform(heroScroll, [0, 0.6], [1, 0]);
+  const heroScale = useTransform(heroScroll, [0, 0.6], [1, 0.88]);
+
+  // Code story
+  const [stage, setStage] = useState(0);
+  const codeRef = useRef(null);
+  const codeInView = useInView(codeRef, { margin: '-25%', once: false });
+  useEffect(() => {
+    if (codeInView) {
+      const t = [
+        setTimeout(() => setStage(1), 800),
+        setTimeout(() => setStage(2), 2200),
+        setTimeout(() => setStage(3), 3800),
+        setTimeout(() => setStage(4), 5200),
+        setTimeout(() => setStage(5), 6800),
+      ];
+      return () => t.forEach(clearTimeout);
+    } else { setStage(0); }
+  }, [codeInView]);
+
+  // Pipeline
+  const [pipe, setPipe] = useState(0);
+  const pipeRef = useRef(null);
+  const pipeInView = useInView(pipeRef, { margin: '-20%', once: false });
+  useEffect(() => {
+    if (pipeInView) {
+      let s = 0;
+      const id = setInterval(() => { setPipe(s % 6); s++; }, 1100);
+      return () => clearInterval(id);
+    } else setPipe(0);
+  }, [pipeInView]);
 
   return (
-    <div className="min-h-screen bg-[#0F172A] text-slate-200 overflow-x-hidden relative selection:bg-indigo-500/30 selection:text-indigo-200">
-      {/* Ambient background glow */}
-      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-indigo-600/20 rounded-full blur-[120px] pointer-events-none"></div>
-      <div className="fixed bottom-0 right-0 w-[800px] h-[600px] bg-emerald-600/10 rounded-full blur-[150px] pointer-events-none"></div>
+    <div className="homepage-container">
+      <CinematicBackground mouseX={mouseX} mouseY={mouseY} />
 
-      <BackgroundParticles />
-
-      {/* 1. HERO SECTION */}
-      <Section id="hero" className="flex flex-col items-center justify-center min-h-[90vh] text-center pt-32 lg:pt-40 relative z-10">
-        <motion.div variants={fadeUp} className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-slate-900/80 border border-indigo-500/30 mb-10 shadow-[0_0_20px_rgba(99,102,241,0.2)] backdrop-blur-md">
+      {/* ── SCENE 1: CINEMATIC HERO ── */}
+      <motion.div
+        ref={heroRef}
+        className="home-hero px-6"
+        style={{ y: heroY, opacity: heroOpacity, scale: heroScale }}
+      >
+        {/* Status badge */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="inline-flex items-center gap-3 px-5 py-2.5 mb-14 z-20 rounded-sm border border-[#00F3FF]/30 bg-[#030305]/70 backdrop-blur-2xl"
+          style={{ boxShadow: '0 0 30px rgba(0,243,255,0.08)' }}
+        >
           <span className="relative flex h-3 w-3">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500 shadow-[0_0_10px_#22C55E]"></span>
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00FF66] opacity-80" />
+            <span className="relative flex h-3 w-3 rounded-full bg-[#00FF66]" style={{ boxShadow: '0 0 12px #00FF66' }} />
           </span>
-          <span className="text-sm font-medium text-indigo-300 tracking-wide">Autonomous AI Security Engine Active</span>
+          <span className="text-[10px] font-black text-[#00F3FF] tracking-[0.3em] uppercase">Neural Engine · Online</span>
         </motion.div>
 
-        <motion.h1 variants={fadeUp} className="text-6xl md:text-8xl font-black tracking-tighter mb-8 leading-tight">
-          Discover <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-cyan-300 to-indigo-500 filter drop-shadow-[0_0_30px_rgba(99,102,241,0.5)]">Unknown</span> <br />
-          Vulnerabilities
-        </motion.h1>
+        {/* Neural canvas layer under headline */}
+        <div className="absolute inset-0 z-0">
+          <NeuralCanvas mouseX={mouseX} mouseY={mouseY} />
+        </div>
 
-        <motion.p variants={fadeUp} className="text-xl md:text-2xl text-slate-400 max-w-3xl mb-14 leading-relaxed font-light">
-          An advanced AI-driven pipeline that analyzes, executes, and uncovers sophisticated zero-day threats in your codebase before they are ever exploited.
+        <div className="relative z-10">
+          <HeroTypewriter />
+        </div>
+
+        <motion.p
+          initial={{ opacity: 0, filter: 'blur(6px)' }}
+          animate={{ opacity: 1, filter: 'blur(0px)' }}
+          transition={{ delay: 1.5, duration: 1.2 }}
+          className="mt-10 text-xl md:text-2xl text-[#94A3B8] max-w-3xl text-center font-light leading-relaxed z-10 relative"
+        >
+          A fully autonomous pipeline that parses, sandboxes, and surgically patches zero-day exploits—before adversaries discover them.
         </motion.p>
 
-        <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center gap-6 z-20">
-          <Link
-            to="/upload"
-            className="group relative inline-flex items-center justify-center gap-3 px-10 py-5 bg-indigo-600 text-white font-bold rounded-full overflow-hidden transition-all duration-300 hover:scale-105 shadow-[0_0_40px_rgba(99,102,241,0.5)] hover:shadow-[0_0_60px_rgba(99,102,241,0.8)]"
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-cyan-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            <Activity className="w-5 h-5 relative z-10 group-hover:animate-pulse" />
-            <span className="relative z-10 text-lg tracking-wide">Start Scan</span>
-          </Link>
-          <Link
-            to="/dashboard"
-            className="group inline-flex items-center justify-center gap-3 px-10 py-5 bg-slate-900/50 hover:bg-slate-800 text-slate-300 font-bold rounded-full transition-all duration-300 border border-slate-700 hover:border-indigo-500/50 hover:text-white hover:shadow-[0_0_30px_rgba(99,102,241,0.2)] backdrop-blur-md"
-          >
-            <Server className="w-5 h-5 text-slate-500 group-hover:text-indigo-400 transition-colors" />
-            <span className="text-lg tracking-wide">View Dashboard</span>
-          </Link>
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.9, duration: 0.9, type: 'spring', bounce: 0.45 }}
+          className="flex flex-col sm:flex-row items-center gap-6 mt-16 z-10 relative"
+        >
+          <RippleButton to="/upload" className="home-btn-scan" icon={Activity} text="Initialize Scan" />
+          <RippleButton to="/dashboard" className="home-btn-upload" icon={UploadCloud} text="Upload Target" uploadArrow />
         </motion.div>
-      </Section>
+      </motion.div>
 
-      {/* 2. AI SYSTEM OVERVIEW SECTION */}
-      <Section id="pipeline" className="relative z-10 mt-10">
-        <motion.div variants={fadeUp} className="text-center mb-20">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">The Neural Pipeline</h2>
-          <p className="text-lg text-slate-400 max-w-2xl mx-auto">How our autonomous system dissects programs to discover critical flaws.</p>
-        </motion.div>
-
-        <motion.div variants={stagger} className="flex flex-col lg:flex-row items-stretch justify-center gap-6 relative">
-          <div className="hidden lg:block absolute top-1/2 left-10 right-10 h-1 bg-slate-800 -translate-y-1/2 z-0">
-            <motion.div 
-              className="h-full bg-gradient-to-r from-indigo-500 via-cyan-400 to-emerald-500"
-              initial={{ width: "0%" }}
-              whileInView={{ width: "100%" }}
-              transition={{ duration: 1.5, ease: "easeInOut" }}
-            />
-          </div>
-
-          {[
-            { step: "01", title: "Program Analysis", icon: Code2, color: "text-indigo-400", bg: "bg-indigo-500/10", border: "border-indigo-500/30", hoverColor: "rgba(99,102,241,0.7)" },
-            { step: "02", title: "AI Input Gen", icon: Cpu, color: "text-cyan-400", bg: "bg-cyan-500/10", border: "border-cyan-500/30", hoverColor: "rgba(34,211,238,0.7)" },
-            { step: "03", title: "Execution Monitor", icon: Activity, color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/30", hoverColor: "rgba(59,130,246,0.7)" },
-            { step: "04", title: "Anomaly Detect", icon: Filter, color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/30", hoverColor: "rgba(16,185,129,0.7)" },
-            { step: "05", title: "Vuln Report", icon: AlertTriangle, color: "text-red-400", bg: "bg-red-500/10", border: "border-red-500/30", hoverColor: "rgba(239,68,68,0.7)" }
-          ].map((item, i) => (
-            <HoverTrail key={i} color={item.hoverColor}>
-              <motion.div variants={fadeUp} className={`flex-1 relative z-10 bg-slate-900/80 backdrop-blur-xl border ${item.border} p-6 rounded-2xl flex flex-col items-center text-center shadow-lg hover:shadow-[0_0_30px_rgba(99,102,241,0.15)] transition-all duration-300 group hover:-translate-y-2`}>
-              <div className={`w-16 h-16 rounded-full ${item.bg} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 shadow-inner`}>
-                <item.icon className={`w-8 h-8 ${item.color}`} />
-              </div>
-              <span className="text-xs font-bold tracking-widest text-slate-500 mb-2 uppercase">Phase {item.step}</span>
-              <h3 className="text-lg font-bold text-slate-200">{item.title}</h3>
-            </motion.div>
-            </HoverTrail>
-          ))}
-        </motion.div>
-      </Section>
-
-      {/* 3. FEATURE CARDS */}
-      <Section id="features" className="relative z-10 mt-10">
-        <motion.div variants={stagger} className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {[
-            { title: "Program Analyzer", description: "Deep abstract syntax tree parsing to understand structural semantics.", icon: Terminal, glow: "hover:shadow-[0_0_40px_rgba(99,102,241,0.3)]", accent: "indigo-400", bgAccent:"bg-indigo-500", hoverColor: "rgba(99,102,241,0.7)" },
-            { title: "Automated Intelligent Testing", description: "Fuzzing combined with neural guidance to reach deep execution branches.", icon: Zap, glow: "hover:shadow-[0_0_40px_rgba(34,197,94,0.3)]", accent: "emerald-400", bgAccent:"bg-emerald-500", hoverColor: "rgba(16,185,129,0.7)" },
-            { title: "AI Anomaly Detection", description: "Detects memory leaks, buffer overflows, and race conditions via behavioral models.", icon: Fingerprint, glow: "hover:shadow-[0_0_40px_rgba(6,182,212,0.3)]", accent: "cyan-400", bgAccent:"bg-cyan-500", hoverColor: "rgba(34,211,238,0.7)" },
-            { title: "Vulnerability Explanation Engine", description: "Generates human-readable RCA (Root Cause Analysis) for complex vulnerabilities.", icon: Lock, glow: "hover:shadow-[0_0_40px_rgba(239,68,68,0.3)]", accent: "red-400", bgAccent:"bg-red-500", hoverColor: "rgba(239,68,68,0.7)" }
-          ].map((feat, i) => (
-            <HoverTrail key={i} color={feat.hoverColor}>
-              <motion.div variants={fadeUp} className={`group relative bg-slate-800/40 border border-slate-700 p-10 rounded-3xl overflow-hidden transition-all duration-500 ${feat.glow} backdrop-blur-sm hover:bg-slate-800/80 hover:-translate-y-1`}>
-              <div className={`absolute -top-10 -right-10 w-40 h-40 ${feat.bgAccent} opacity-10 rounded-full blur-[50px] group-hover:opacity-20 transition-opacity duration-500`} />
-              <div className="relative z-10">
-                <feat.icon className={`w-10 h-10 mb-6 text-slate-400 group-hover:text-${feat.accent} transition-colors duration-300`} />
-                <h3 className="text-2xl font-bold mb-4 text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-slate-400 transition-all">{feat.title}</h3>
-                <p className="text-slate-400 leading-relaxed text-lg">{feat.description}</p>
-              </div>
-            </motion.div>
-            </HoverTrail>
-          ))}
-        </motion.div>
-      </Section>
-
-      {/* 4. INTERACTIVE ARCHITECTURE & 5. DASHBOARD PREVIEW */}
-      <Section id="architecture-dashboard" className="relative z-10 mt-10 mb-32">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-          
-          {/* Architecture Concept */}
-          <motion.div variants={fadeUp} className="relative aspect-square max-h-[500px] flex items-center justify-center m-auto w-full">
-            <div className="absolute inset-0 bg-indigo-900/10 rounded-full blur-3xl" />
-            
-            <div className="relative z-10 w-full h-full flex items-center justify-center scale-75 md:scale-100">
-              {/* Central Node */}
-              <motion.div 
-                className="w-32 h-32 rounded-full bg-slate-900 border border-indigo-500/50 flex items-center justify-center shadow-[0_0_50px_rgba(99,102,241,0.4)] z-30 relative"
-                animate={{ boxShadow: ["0 0 40px rgba(99,102,241,0.3)", "0 0 80px rgba(99,102,241,0.6)", "0 0 40px rgba(99,102,241,0.3)"] }}
-                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-              >
-                <div className="w-24 h-24 rounded-full bg-indigo-600/20 flex items-center justify-center border border-indigo-400/30">
-                  <ShieldCheck className="w-10 h-10 text-indigo-400" />
-                </div>
-              </motion.div>
-
-              {/* Orbiting Nodes */}
-              {[
-                { label: "Target Code", delay: 0 },
-                { label: "Model Weights", delay: -6.6 },
-                { label: "Execution Sandbox", delay: -13.3 },
-              ].map((orbit, i) => (
-                <motion.div
-                  key={i}
-                  className="absolute z-20"
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 20, repeat: Infinity, ease: "linear", delay: orbit.delay }}
-                  style={{ width: `${(i+2)*110}px`, height: `${(i+2)*110}px` }}
-                >
-                  <div className="w-full h-full rounded-full border border-slate-700/40 absolute top-0 left-0 border-dashed" />
-                  <motion.div 
-                    className="absolute -top-4 left-1/2 -translate-x-1/2 bg-slate-900 border border-slate-700 px-4 py-2 rounded-xl text-sm font-semibold shadow-lg whitespace-nowrap text-slate-300 flex items-center gap-2"
-                    animate={{ rotate: -360 }}
-                    transition={{ duration: 20, repeat: Infinity, ease: "linear", delay: orbit.delay }}
-                  >
-                    <div className={`w-2 h-2 rounded-full ${i===0?'bg-emerald-400':i===1?'bg-cyan-400':'bg-indigo-400'} shadow-[0_0_8px_rgba(255,255,255,0.5)]`} />
-                    {orbit.label}
-                  </motion.div>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-
-          {/* Dashboard Preview */}
-          <motion.div variants={fadeUp} className="bg-[#1E293B]/80 backdrop-blur-xl border border-slate-700 rounded-3xl overflow-hidden shadow-2xl relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-emerald-500/5 z-0" />
-            
-            <div className="bg-slate-900/80 border-b border-slate-700/80 px-6 py-4 flex items-center justify-between relative z-10">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]" />
-                <div className="w-3 h-3 rounded-full bg-yellow-500" />
-                <div className="w-3 h-3 rounded-full bg-green-500" />
-              </div>
-              <div className="text-xs font-mono font-medium text-slate-400 tracking-wider">LIVE_SCAN_RESULTS</div>
-            </div>
-
-            <div className="p-8 relative z-10 flex flex-col gap-5">
-              <HoverTrail color="rgba(239,68,68,0.7)">
-                <motion.div 
-                initial={{ opacity: 0, x: 20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2 }}
-                className="bg-red-500/10 border border-red-500/20 p-5 rounded-2xl flex items-start gap-4 hover:bg-red-500/20 transition-colors"
-              >
-                <div className="bg-red-500/20 p-2.5 rounded-xl"><AlertTriangle className="text-red-400 w-5 h-5" /></div>
-                <div className="flex-1">
-                  <div className="flex justify-between items-center mb-1.5">
-                    <h4 className="font-bold text-slate-200">Buffer Overflow</h4>
-                    <span className="text-[10px] bg-red-500/20 text-red-400 border border-red-500/30 px-2 py-0.5 rounded font-bold uppercase tracking-widest flex items-center gap-1">
-                       <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse"></span>
-                       High
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-400 font-mono tracking-wide">auth_module.c : 142</p>
-                </div>
-              </motion.div>
-              </HoverTrail>
-
-              <HoverTrail color="rgba(234,179,8,0.7)">
-                <motion.div 
-                initial={{ opacity: 0, x: 20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.4 }}
-                className="bg-yellow-500/10 border border-yellow-500/20 p-5 rounded-2xl flex items-start gap-4 hover:bg-yellow-500/20 transition-colors"
-              >
-                <div className="bg-yellow-500/20 p-2.5 rounded-xl"><Activity className="text-yellow-400 w-5 h-5" /></div>
-                <div className="flex-1">
-                  <div className="flex justify-between items-center mb-1.5">
-                    <h4 className="font-bold text-slate-200">Memory Leak</h4>
-                    <span className="text-[10px] bg-yellow-500/20 text-yellow-500 border border-yellow-500/30 px-2 py-0.5 rounded font-bold uppercase tracking-widest">Medium</span>
-                  </div>
-                  <p className="text-xs text-slate-400 font-mono tracking-wide">session_manager.cpp : 89</p>
-                </div>
-              </motion.div>
-              </HoverTrail>
-
-              <HoverTrail color="rgba(99,102,241,0.7)">
-                <motion.div 
-                initial={{ opacity: 0, x: 20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.6 }}
-                className="bg-indigo-500/10 border border-indigo-500/20 p-5 rounded-2xl flex items-start gap-4 hover:bg-indigo-500/20 transition-colors"
-              >
-                <div className="bg-indigo-500/20 p-2.5 rounded-xl"><ShieldCheck className="text-indigo-400 w-5 h-5" /></div>
-                <div className="flex-1">
-                  <div className="flex justify-between items-center mb-1.5">
-                    <h4 className="font-bold text-slate-200">Race Condition</h4>
-                    <span className="text-[10px] bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 px-2 py-0.5 rounded font-bold uppercase tracking-widest">Low</span>
-                  </div>
-                  <p className="text-xs text-slate-400 font-mono tracking-wide">worker_pool.rs : 215</p>
-                </div>
-              </motion.div>
-              </HoverTrail>
-            </div>
-            
-          </motion.div>
+      {/* ── SCENE 2: STATS BAR ── */}
+      <div className="relative z-30 border-y border-[#0F172A]"
+        style={{ background: 'rgba(3,3,5,0.92)', backdropFilter: 'blur(30px)' }}>
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-around divide-y md:divide-y-0 md:divide-x divide-[#0F172A]">
+          <AnimatedCounter end={1200} suffix="+" label="Programs Assessed" />
+          <AnimatedCounter end={86} label="Zero-Days Isolated" />
+          <AnimatedCounter end={99} suffix="%" label="Autonomous Patch Rate" />
         </div>
-      </Section>
+      </div>
+
+      {/* ── SCENE 3: AI NETWORK VISUAL ── */}
+      <Scene id="network" className="items-center text-center gap-8 relative overflow-hidden">
+        <div className="absolute inset-0 z-0 opacity-40">
+          <NeuralCanvas mouseX={mouseX} mouseY={mouseY} />
+        </div>
+        <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
+          transition={{ duration: 1 }}
+          className="relative z-10 max-w-4xl px-4"
+        >
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 mb-6 rounded-sm text-xs font-black uppercase tracking-[0.2em] border border-[#BC13FE]/40 text-[#BC13FE]"
+            style={{ background: 'rgba(188,19,254,0.08)' }}>
+            <Network size={12} /> AI Neural System
+          </div>
+          <h2 className="text-4xl md:text-6xl font-black tracking-tight text-[#F3F4F6] mb-6 leading-tight">
+            Real-Time Threat<br /><span style={{ background: 'linear-gradient(135deg,#00F3FF,#BC13FE)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Intelligence Engine</span>
+          </h2>
+          <p className="text-[#94A3B8] text-lg md:text-xl font-light leading-relaxed">
+            Our deep neural architecture ingests live code streams, correlates behavioural patterns, and flags anomalies across thousands of execution paths—simultaneously.
+          </p>
+        </motion.div>
+
+        {/* Feature grid cards */}
+        <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-6 w-full mt-12 px-4">
+          {[
+            { icon: Code2, color: '#00F3FF', title: 'Semantic Parsing', desc: 'AST-level analysis of every code path.' },
+            { icon: Cpu, color: '#BC13FE', title: 'Neural Inference', desc: 'Deep learning model detects hidden patterns.' },
+            { icon: ShieldCheck, color: '#00FF66', title: 'Auto-Remediation', desc: 'Patches compiled & applied in milliseconds.' },
+          ].map((c, i) => (
+            <motion.div key={i}
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.15, duration: 0.8 }}
+              whileHover={{ y: -6, scale: 1.01 }}
+              className="home-panel-glass p-8 flex flex-col items-start gap-4 cursor-default"
+              style={{ borderLeft: `3px solid ${c.color}` }}
+            >
+              <div className="p-3 rounded-sm" style={{ background: `${c.color}18`, color: c.color }}>
+                <c.icon size={24} />
+              </div>
+              <h3 className="text-xl font-black text-[#F3F4F6]">{c.title}</h3>
+              <p className="text-[#64748B] text-sm leading-relaxed">{c.desc}</p>
+            </motion.div>
+          ))}
+        </div>
+      </Scene>
+
+      {/* ── SCENE 4 & 5: CODE FIX ── */}
+      <section id="fix" className="home-section relative z-20 w-full"
+        style={{ background: 'linear-gradient(to bottom, transparent, rgba(3,3,5,0.8) 30%, rgba(3,3,5,0.8) 70%, transparent)' }}>
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center px-6 w-full">
+
+          {/* Left: narrative steps */}
+          <motion.div
+            initial={{ opacity: 0, x: -60 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: '-80px' }}
+            transition={{ duration: 1, ease: 'easeOut' }}
+          >
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 mb-8 border border-[#FF003C]/40 text-[#FF003C] text-xs font-black uppercase tracking-[0.2em] rounded-sm"
+              style={{ background: 'rgba(255,0,60,0.08)' }}>
+              <AlertTriangle size={12} /> Live Threat Resolution
+            </div>
+            <h2 className="text-4xl md:text-6xl font-black tracking-tight text-[#F3F4F6] leading-tight mb-10">
+              Detect.<br />Isolate.<br /><span className="text-[#00FF66]" style={{ textShadow: '0 0 30px #00FF66' }}>Neutralize.</span>
+            </h2>
+            <div className="space-y-5">
+              {[
+                { label: 'Syntax tree constructed', active: stage >= 1 },
+                { label: 'Heuristic scan running', active: stage >= 2 },
+                { label: 'SQL Injection detected', active: stage >= 3, alert: true },
+                { label: 'Patch compiled & applied', active: stage >= 5, success: true },
+              ].map((s, i) => {
+                const col = s.success && s.active ? '#00FF66' : s.alert && s.active ? '#FF003C' : s.active ? '#00F3FF' : '#334155';
+                return (
+                  <div key={i} className="flex items-center gap-4">
+                    <motion.div animate={{ borderColor: col, backgroundColor: `${col}22` }}
+                      transition={{ duration: 0.4 }}
+                      className="w-9 h-9 rounded-sm border-2 flex items-center justify-center flex-shrink-0"
+                      style={{ borderColor: col }}>
+                      {s.success && s.active ? <CheckCircle size={16} color={col} /> :
+                        s.alert && s.active ? <Lock size={16} color={col} /> :
+                          s.active ? <Zap size={16} color={col} /> :
+                            <div className="w-2 h-2 rounded-full bg-[#334155]" />}
+                    </motion.div>
+                    <motion.span animate={{ color: col }} transition={{ duration: 0.4 }}
+                      className="text-base font-bold tracking-wide" style={{ color: col }}>
+                      {s.label}
+                    </motion.span>
+                  </div>
+                );
+              })}
+            </div>
+          </motion.div>
+
+          {/* Right: animated code block */}
+          <div className="home-story-code-container" ref={codeRef}>
+            <motion.div
+              className="home-story-code-block text-sm md:text-base"
+              initial={{ rotateX: 25, rotateY: -12, scale: 0.88, opacity: 0 }}
+              whileInView={{ rotateX: 0, rotateY: 0, scale: 1, opacity: 1 }}
+              viewport={{ once: true, margin: '-80px' }}
+              transition={{ duration: 1.2, type: 'spring', bounce: 0.35 }}
+            >
+              {/* Window chrome */}
+              <div className="flex items-center gap-2.5 mb-6 pb-4 border-b border-[#1E293B]">
+                {[stage >= 3 && stage < 5 ? '#FF003C' : '#1e293b', '#1e293b', stage >= 5 ? '#00FF66' : '#1e293b'].map((c, i) => (
+                  <div key={i} className="w-3.5 h-3.5 rounded-full transition-all duration-500"
+                    style={{ background: c, boxShadow: c !== '#1e293b' ? `0 0 10px ${c}` : 'none' }} />
+                ))}
+                <span className="ml-3 font-mono text-xs text-[#334155]">wallet_controller.js</span>
+              </div>
+
+              {/* Scan overlay */}
+              {stage >= 2 && stage < 5 && <div className="home-scan-overlay" />}
+
+              <pre className="relative z-10 whitespace-pre-wrap break-words overflow-x-auto">
+                <code>
+                  <span className="text-[#BC13FE] font-bold">async function</span>{' '}
+                  <span className="text-[#00F3FF]">processTransaction</span>(user, amount) {'{\n'}
+                  {'  '}if (!user.isAuthenticated) return <span className="text-[#FF003C]">false</span>;{'\n\n'}
+                  {'  '}
+                  <motion.span
+                    className="inline-block w-full rounded py-1 px-2 -mx-2 transition-all duration-300"
+                    animate={{
+                      backgroundColor: stage === 3 ? 'rgba(255,0,60,0.15)' : stage >= 5 ? 'rgba(0,255,102,0.08)' : 'transparent',
+                      borderLeftColor: stage === 3 ? '#FF003C' : stage >= 5 ? '#00FF66' : 'transparent',
+                    }}
+                    style={{ borderLeftWidth: stage >= 3 ? 3 : 0 }}
+                  >
+                    <span className={stage === 3 ? 'text-[#FF003C]' : stage >= 5 ? 'text-[#00FF66]' : 'text-[#E5E7EB]'}>
+                      {stage < 5
+                        ? 'db.query(`UPDATE wallets SET bal=bal-${amount} WHERE id=${user.id}`); // SQLi'
+                        : "db.query('UPDATE wallets SET bal=bal-$1 WHERE id=$2',[amount,user.id]); // Secured"}
+                    </span>
+                  </motion.span>
+                  {'\n\n'}
+                  {'  '}return <span className="text-[#00FF66]">true</span>;{'\n'}
+                  {'}'}
+                </code>
+              </pre>
+
+              {/* Floating icons */}
+              <AnimatePresence>
+                {[1, 2, 3].includes(stage) && (
+                  <motion.div key="bug"
+                    initial={{ scale: 0, rotate: -45, opacity: 0 }}
+                    animate={{ scale: 1, rotate: 0, opacity: 1 }}
+                    exit={{ scale: 0, y: -80, rotate: 90, opacity: 0 }}
+                    transition={{ type: 'spring', bounce: 0.5 }}
+                    className="home-story-bug right-[8%] top-[40%]">
+                    <Bug size={36} />
+                  </motion.div>
+                )}
+                {stage >= 5 && (
+                  <motion.div key="check"
+                    initial={{ scale: 0, rotate: -90, opacity: 0 }}
+                    animate={{ scale: 1, rotate: 0, opacity: 1 }}
+                    transition={{ type: 'spring', bounce: 0.6 }}
+                    className="absolute right-[8%] top-[40%] z-30 text-[#00FF66]"
+                    style={{ filter: 'drop-shadow(0 0 20px #00FF66)' }}>
+                    <CheckCircle size={40} />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── SCENE 6: PIPELINE ── */}
+      <Scene id="pipeline" className="items-center text-center gap-16">
+        <div className="px-4">
+          <h2 className="text-4xl md:text-6xl font-black text-[#F3F4F6] mb-5 tracking-tight">
+            Neural Execution Pipeline
+          </h2>
+          <p className="text-[#64748B] text-xl max-w-2xl mx-auto font-light">Data streams through five precision stages—every millisecond tracked.</p>
+        </div>
+        <div className="w-full px-4 md:px-8" ref={pipeRef}>
+          <div className="flex flex-col lg:flex-row items-center justify-between home-pipeline-container gap-6 lg:gap-0 w-full">
+            {[
+              { label: 'Code Parsing', icon: Code2, sub: 'AST Gen' },
+              { label: 'AI Fuzzing', icon: Cpu, sub: 'Input Synth' },
+              { label: 'Sandbox Exec', icon: Activity, sub: 'Runtime Mon' },
+              { label: 'Heuristics', icon: Eye, sub: 'Anomaly Detect' },
+              { label: 'Remediation', icon: ShieldCheck, sub: 'Patch Deploy' },
+            ].map((node, i) => (
+              <React.Fragment key={i}>
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1, duration: 0.7 }}
+                  className="flex flex-col items-center justify-center p-8 rounded-sm border transition-all duration-700 w-full lg:w-52 z-10"
+                  style={{
+                    borderColor: pipe >= i ? '#00F3FF' : '#1E293B',
+                    background: pipe >= i ? 'rgba(0,243,255,0.07)' : 'rgba(8,8,11,0.7)',
+                    boxShadow: pipe >= i ? '0 0 30px rgba(0,243,255,0.2), inset 0 0 20px rgba(0,243,255,0.03)' : '0 0 40px rgba(0,0,0,0.5)',
+                    transform: pipe >= i ? 'translateY(-6px)' : 'none',
+                  }}
+                >
+                  <node.icon size={32} className="mb-4 transition-all duration-500"
+                    style={{ color: pipe >= i ? '#00F3FF' : '#475569', filter: pipe >= i ? 'drop-shadow(0 0 10px #00F3FF)' : 'none' }} />
+                  <span className="text-sm font-black text-center transition-colors duration-500"
+                    style={{ color: pipe >= i ? '#F3F4F6' : '#94A3B8' }}>
+                    {node.label}
+                  </span>
+                  <span className="text-[10px] mt-2 uppercase tracking-widest font-bold transition-colors duration-500"
+                    style={{ color: pipe >= i ? '#00F3FF' : '#334155' }}>
+                    {node.sub}
+                  </span>
+                </motion.div>
+                {i < 4 && (
+                  <div className="home-pipeline-connection">
+                    <div className="home-pipeline-pulse" style={{ animationDelay: `${i * 0.3}s` }} />
+                  </div>
+                )}
+              </React.Fragment>
+            ))}
+          </div>
+        </div>
+      </Scene>
+
+      {/* ── SCENE 7: STATS ── */}
+      <div id="stats" className="home-stats relative z-20 border-t border-[#0F172A] pb-32"
+        style={{ background: 'rgba(3,3,5,0.9)', backdropFilter: 'blur(30px)' }}>
+        <div className="text-center pt-24 pb-12 px-4">
+          <h2 className="text-4xl md:text-5xl font-black text-[#F3F4F6] mb-4 tracking-tight">Impact at Scale</h2>
+          <p className="text-[#64748B] text-lg">Numbers that define a new security standard.</p>
+        </div>
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-around divide-y md:divide-y-0 md:divide-x divide-[#0F172A]">
+          <AnimatedCounter end={1200} suffix="+" label="Programs Scanned" />
+          <AnimatedCounter end={86} label="Vulnerabilities Found" />
+          <AnimatedCounter end={74} label="Threats Neutralized" />
+        </div>
+      </div>
     </div>
   );
 };
