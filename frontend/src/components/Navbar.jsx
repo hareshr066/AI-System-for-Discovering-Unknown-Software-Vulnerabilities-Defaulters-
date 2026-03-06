@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
+    Home,
     LayoutDashboard,
     Upload,
     Shield,
@@ -14,6 +15,7 @@ import {
 } from 'lucide-react';
 
 const navItems = [
+    { name: 'Home', path: '/', icon: Home },
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
     { name: 'Upload & Analyze', path: '/upload', icon: Upload },
     { name: 'Vulnerability Explorer', path: '/vulnerabilities', icon: Shield },
