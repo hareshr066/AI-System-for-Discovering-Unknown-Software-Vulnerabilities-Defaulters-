@@ -17,6 +17,9 @@ import SecurityReports from './pages/SecurityReports';
 import AiInsights from './pages/AiInsights';
 import TeamCollaboration from './pages/TeamCollaboration';
 import SystemSettings from './pages/SystemSettings';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsOfService from './pages/TermsOfService';
+import Security from './pages/Security';
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -36,6 +39,9 @@ function AnimatedRoutes() {
         <Route path="/insights" element={<PageTransition><AiInsights /></PageTransition>} />
         <Route path="/collaboration" element={<PageTransition><TeamCollaboration /></PageTransition>} />
         <Route path="/settings" element={<PageTransition><SystemSettings /></PageTransition>} />
+        <Route path="/privacy-policy" element={<PageTransition><PrivacyPolicy /></PageTransition>} />
+        <Route path="/terms-of-service" element={<PageTransition><TermsOfService /></PageTransition>} />
+        <Route path="/security" element={<PageTransition><Security /></PageTransition>} />
       </Routes>
     </AnimatePresence>
   );
