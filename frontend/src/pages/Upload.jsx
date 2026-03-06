@@ -13,9 +13,32 @@ const Upload = () => {
         setIsLoaded(true);
     }, []);
 
-    const handleStartScan = () => {
-        if (file) {
-            navigate('/scan');
+    const handleStartScan = async () => {
+        if (!file) return;
+
+        try {
+            // Set an uploading state so user knows it's working
+            setError("Uploading file to secure server...");
+
+            const formData = new FormData();
+            formData.append("file", file);
+
+            const response = await fetch("http://localhost:8000/upload-folder", {
+                method: "POST",
+                body: formData,
+            });
+
+            if (response.ok) {
+                // File successfully sent to Python
+                setError("");
+                navigate('/scan');
+            } else {
+                const errData = await response.json();
+                setError(errData.detail || "Failed to upload file to engine.");
+            }
+        } catch (err) {
+            console.error(err);
+            setError("Network error: Could not reach backend server.");
         }
     };
 
@@ -32,17 +55,17 @@ const Upload = () => {
     const validateAndSetFile = (selectedFile) => {
         const validExtensions = ['.c', '.cpp', '.js', '.py', '.go'];
         const fileExtension = '.' + selectedFile.name.split('.').pop().toLowerCase();
-        
+
         if (!validExtensions.includes(fileExtension)) {
             setError("Invalid file type. Supported formats: C, C++, Python, JavaScript, Go.");
             return;
         }
-        
+
         if (selectedFile.size > 10 * 1024 * 1024) {
             setError("File size exceeds the 10MB limit.");
             return;
         }
-        
+
         setFile(selectedFile);
         setError("");
     };
@@ -81,7 +104,7 @@ const Upload = () => {
 
     return (
         <div className={`relative min-h-[100dvh] bg-[#020617] text-[#F9FAFB] font-sans flex flex-col items-center py-6 px-4 sm:px-6 lg:px-8 transition-opacity duration-1000 ${isLoaded ? 'opacity-100' : 'opacity-0'} overflow-hidden`}>
-            
+
             {/* Height.app-style Animation Styles */}
             <style>{`
                 /* Subtle background grid */
@@ -89,7 +112,7 @@ const Upload = () => {
                     position: absolute;
                     inset: 0;
                     background-size: 50px 50px;
-                    background-image: 
+                    background-image:
                         linear-gradient(to right, rgba(99, 102, 241, 0.04) 1px, transparent 1px),
                         linear-gradient(to bottom, rgba(99, 102, 241, 0.04) 1px, transparent 1px);
                     mask-image: linear-gradient(to bottom, black 40%, transparent 100%), radial-gradient(ellipse at center, black 20%, transparent 80%);
@@ -171,13 +194,13 @@ const Upload = () => {
             {/* Background Elements */}
             <div className="tech-grid"></div>
             <div className="glow-orb"></div>
-            
+
             {/* Top Light Flare */}
             <div className="absolute top-0 inset-x-0 h-px w-full bg-gradient-to-r from-transparent via-indigo-500 to-transparent opacity-50 shadow-[0_0_20px_rgba(99,102,241,0.5)] z-20"></div>
 
             {/* Centered Main Section */}
             <main className="relative z-10 w-full flex flex-col items-center justify-center flex-1 pb-20 pt-10">
-                <div className="text-center mb-12 w-full max-w-2xl px-4 animate-card-enter" style={{animationDelay: '0.1s'}}>
+                <div className="text-center mb-12 w-full max-w-2xl px-4 animate-card-enter" style={{ animationDelay: '0.1s' }}>
                     <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-medium mb-6 backdrop-blur-md">
                         <span className="relative flex h-2 w-2">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
@@ -195,11 +218,11 @@ const Upload = () => {
                 </div>
 
                 {/* Upload Card */}
-                <div className={`w-full max-w-2xl animated-card p-1 sm:p-2 shadow-[0_0_50px_rgba(0,0,0,0.5)] ${isLoaded ? 'animate-card-enter' : 'opacity-0'}`} style={{animationDelay: '0.2s'}}>
+                <div className={`w-full max-w-2xl animated-card p-1 sm:p-2 shadow-[0_0_50px_rgba(0,0,0,0.5)] ${isLoaded ? 'animate-card-enter' : 'opacity-0'}`} style={{ animationDelay: '0.2s' }}>
                     <div className="bg-slate-900/90 rounded-[1.3rem] p-8 sm:p-10 w-full h-full relative overflow-hidden">
-                        
+
                         <div className="relative z-10 flex flex-col items-center w-full">
-                            
+
                             {/* Drag and Drop Zone */}
                             {!file ? (
                                 <label
@@ -208,11 +231,10 @@ const Upload = () => {
                                     onDragOver={handleDrag}
                                     onDrop={handleDrop}
                                     htmlFor="code-upload"
-                                    className={`w-full flex flex-col items-center justify-center py-16 px-6 border-2 border-dashed rounded-xl cursor-pointer transition-all duration-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:border-transparent ${
-                                        isDragging 
-                                        ? 'drop-zone-active' 
-                                        : 'border-slate-700 bg-slate-800/20 hover:border-indigo-500/50 hover:bg-indigo-500/5'
-                                    }`}
+                                    className={`w-full flex flex-col items-center justify-center py-16 px-6 border-2 border-dashed rounded-xl cursor-pointer transition-all duration-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:border-transparent ${isDragging
+                                            ? 'drop-zone-active'
+                                            : 'border-slate-700 bg-slate-800/20 hover:border-indigo-500/50 hover:bg-indigo-500/5'
+                                        }`}
                                 >
                                     <div className={`mb-6 transition-all duration-500 ${isDragging ? 'text-indigo-400 scale-125 drop-shadow-[0_0_15px_rgba(99,102,241,0.6)]' : 'text-slate-500 group-hover/card:text-indigo-400'}`}>
                                         <UploadCloud className="w-16 h-16" strokeWidth={1} />
@@ -223,7 +245,7 @@ const Upload = () => {
                                     <p className="text-slate-500 mb-8 text-center text-sm font-medium">
                                         Limit: 10MB • End-to-End Encrypted Processing
                                     </p>
-                                    
+
                                     {/* Supported Languages Indicators */}
                                     <div className="flex flex-wrap justify-center gap-3 w-full">
                                         {['C', 'C++', 'Python', 'JavaScript', 'Go'].map((lang, idx) => (
@@ -246,7 +268,7 @@ const Upload = () => {
                                 // Uploaded File Area
                                 <div className="w-full flex items-center justify-between p-6 bg-slate-950 border border-indigo-500/30 rounded-xl animate-in fade-in zoom-in-95 duration-500 shadow-[0_0_30px_rgba(99,102,241,0.1)] relative overflow-hidden">
                                     <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-transparent pointer-events-none"></div>
-                                    
+
                                     <div className="flex items-center gap-5 min-w-0 relative z-10">
                                         <div className="flex-shrink-0 p-4 bg-indigo-500/10 rounded-xl border border-indigo-500/20 shadow-[0_0_15px_rgba(99,102,241,0.2)]">
                                             <FileIcon className="w-8 h-8 text-indigo-400" strokeWidth={1.5} />
@@ -279,7 +301,7 @@ const Upload = () => {
                             {/* Error Message */}
                             {error && (
                                 <div className="w-full mt-6 flex items-center gap-3 p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-sm relative overflow-hidden">
-                                     <div className="absolute left-0 top-0 bottom-0 w-1 bg-rose-500"></div>
+                                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-rose-500"></div>
                                     <AlertCircle className="w-5 h-5 flex-shrink-0" />
                                     <p className="font-medium">{error}</p>
                                 </div>
@@ -290,11 +312,10 @@ const Upload = () => {
                                 <button
                                     onClick={handleStartScan}
                                     disabled={!file}
-                                    className={`w-full group relative flex items-center justify-center gap-3 px-6 py-5 rounded-xl font-bold text-lg transition-all duration-500 overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 focus-visible:ring-indigo-500 ${
-                                        file
-                                        ? 'bg-white text-slate-950 hover:scale-[1.02] shadow-[0_0_40px_rgba(255,255,255,0.2)]'
-                                        : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
-                                    }`}
+                                    className={`w-full group relative flex items-center justify-center gap-3 px-6 py-5 rounded-xl font-bold text-lg transition-all duration-500 overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 focus-visible:ring-indigo-500 ${file
+                                            ? 'bg-white text-slate-950 hover:scale-[1.02] shadow-[0_0_40px_rgba(255,255,255,0.2)]'
+                                            : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
+                                        }`}
                                 >
                                     {/* Shining effect on hover for active button */}
                                     {file && (
@@ -305,7 +326,7 @@ const Upload = () => {
                                             100% { transform: translateX(100%); }
                                         }
                                     `}</style>
-                                    
+
                                     <ShieldCheck className={`w-6 h-6 transition-transform duration-300 ${file ? 'group-hover:scale-110' : ''}`} />
                                     <span className="relative z-10">Start Vulnerability Scan</span>
                                 </button>

@@ -14,30 +14,63 @@ const ScanProgress = ({ onComplete }) => {
     ];
 
     useEffect(() => {
-        const totalDuration = 5000; // 5 seconds total
-        const interval = 50; // Update every 50ms
-        const stepsCount = totalDuration / interval;
-        const increment = 100 / stepsCount;
-
+        let isMounted = true;
+        let timer;
         let currentProgress = 0;
+        let apiFinished = false;
 
-        const timer = setInterval(() => {
-            currentProgress += increment;
-            setProgress(Math.min(currentProgress, 100));
-
-            const stepIndex = Math.min(
-                Math.floor((currentProgress / 100) * steps.length),
-                steps.length - 1
-            );
-            setCurrentStep(stepIndex);
-
-            if (currentProgress >= 100) {
-                clearInterval(timer);
-                setTimeout(onComplete, 500); // Wait a half second before completing
+        // Visual fake progress purely for User Experience
+        const incrementProgress = () => {
+            // Don't hit 100% until API is actually done
+            if (currentProgress < 95 && !apiFinished) {
+                // Slow down progress as it gets closer to 95 to mimic deep analysis
+                currentProgress += Math.random() * 3;
+            } else if (apiFinished) {
+                currentProgress = 100;
             }
-        }, interval);
 
-        return () => clearInterval(timer);
+            if (isMounted) {
+                setProgress(Math.min(currentProgress, 100));
+
+                const stepIndex = Math.min(
+                    Math.floor((currentProgress / 100) * steps.length),
+                    steps.length - 1
+                );
+                setCurrentStep(stepIndex);
+            }
+
+            if (currentProgress >= 100 && apiFinished) {
+                clearInterval(timer);
+                if (isMounted) setTimeout(onComplete, 500); // 500ms delay to show 100% full
+            }
+        };
+
+        timer = setInterval(incrementProgress, 200);
+
+        // Actual API Call to Gemini Backend
+        const startAIAnalysis = async () => {
+            try {
+                const response = await fetch("http://localhost:8000/scan", {
+                    method: "POST",
+                });
+                if (response.ok) {
+                    apiFinished = true;
+                } else {
+                    console.error("Backend error during scan");
+                    apiFinished = true; // Complete anyway or user gets stuck
+                }
+            } catch (err) {
+                console.error("Network error triggering scan:", err);
+                apiFinished = true;
+            }
+        };
+
+        startAIAnalysis();
+
+        return () => {
+            isMounted = false;
+            clearInterval(timer);
+        };
     }, [onComplete]);
 
     const CurrentIcon = steps[currentStep].icon;

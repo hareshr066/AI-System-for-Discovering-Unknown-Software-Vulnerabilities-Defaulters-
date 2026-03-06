@@ -1,63 +1,65 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import VulnerabilityCard from '../components/VulnerabilityCard';
 import { Activity, ShieldCheck, Tag } from 'lucide-react';
 
-// Dummy data
-export const dummyVulnerabilities = [
-    {
-        id: 1,
-        type: "Buffer Overflow",
-        file: "login.c",
-        line: 42,
-        severity: "Critical",
-        description: "Unsafe input handling using gets() which can lead to arbitrary code execution.",
-        snippet: "void loginUser() {\n  char username[50];\n  printf(\"Enter username: \");\n  gets(username); // VULNERABILITY: Use fgets instead\n  // ...\n}",
-        remediation: "Replace gets() with fgets() to enforce length limits."
-    },
-    {
-        id: 2,
-        type: "SQL Injection",
-        file: "auth.py",
-        line: 115,
-        severity: "High",
-        description: "User input concatenated directly into SQL query string without proper parameterization.",
-        snippet: "def get_user_data(username):\n    query = f\"SELECT * FROM users WHERE username = '{username}'\"\n    # VULNERABILITY: Unescaped interpolation\n    cursor.execute(query)",
-        remediation: "Use parameterized queries or prepared statements provided by your DB driver."
-    },
-    {
-        id: 3,
-        type: "Cross-Site Scripting (XSS)",
-        file: "Profile.jsx",
-        line: 28,
-        severity: "Medium",
-        description: "Rendering unsanitized user profile biography directly into the DOM using dangerouslySetInnerHTML.",
-        snippet: "const UserBio = ({ bio }) => {\n  // VULNERABILITY: No sanitization of 'bio' string\n  return <div dangerouslySetInnerHTML={{ __html: bio }} />;\n}",
-        remediation: "Sanitize HTML using a library like DOMPurify before rendering it."
-    },
-    {
-        id: 4,
-        type: "Insecure Direct Object Reference",
-        file: "api/routes.js",
-        line: 55,
-        severity: "High",
-        description: "Fetching user documents using an unpredictable sequence ID from request without authorizing the user owns the record.",
-        snippet: "app.get('/api/docs/:docId', (req, res) => {\n  const id = req.params.docId;\n  // VULNERABILITY: Missing ownership check\n  db.collection('docs').findOne({ _id: id });\n});",
-        remediation: "Verify that the authenticated user's ID matches the owner_id of the requested document."
-    }
-];
+// Export dynamically active vulnerabilities for details page routing
+export let activeVulnerabilities = [];
 
 const Dashboard = () => {
     const [filter, setFilter] = useState('All');
+    const [vulnerabilities, setVulnerabilities] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchResults = async () => {
+            try {
+                const response = await fetch('http://localhost:8000/results');
+                if (response.ok) {
+                    const data = await response.json();
+
+                    // Map backend data into our precise frontend UI schema
+                    const formattedIssues = data.issues.map((issue, index) => ({
+                        id: index + 1,
+                        type: issue.type || 'Unknown Issue',
+                        file: issue.file || 'unknown',
+                        line: issue.line || 'N/A',
+                        severity: issue.severity || 'Medium',
+                        description: issue.description || 'No description provided.',
+                        snippet: '/* Code execution path analyzed by Groq AI */', // Placeholder, we can upgrade this later
+                        remediation: issue.fix || 'No fix suggested.'
+                    }));
+
+                    setVulnerabilities(formattedIssues);
+                    activeVulnerabilities = formattedIssues; // Give VulnerabilityDetail.jsx access
+                }
+            } catch (error) {
+                console.error('Failed to fetch vulnerabilities:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchResults();
+    }, []);
 
     const filteredVulns = filter === 'All'
-        ? dummyVulnerabilities
-        : dummyVulnerabilities.filter(v => v.severity === filter);
+        ? vulnerabilities
+        : vulnerabilities.filter(v => v.severity === filter);
 
     const stats = {
-        total: dummyVulnerabilities.length,
-        critical: dummyVulnerabilities.filter(v => v.severity === 'Critical').length,
-        high: dummyVulnerabilities.filter(v => v.severity === 'High').length,
+        total: vulnerabilities.length,
+        critical: vulnerabilities.filter(v => v.severity === 'Critical').length,
+        high: vulnerabilities.filter(v => v.severity === 'High').length,
     };
+
+    if (isLoading) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[60vh] text-slate-400">
+                <div className="w-12 h-12 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin mb-4" />
+                <p>Loading active scan results from backend...</p>
+            </div>
+        );
+    }
 
     return (
         <div className="max-w-6xl mx-auto py-8">
@@ -76,8 +78,8 @@ const Dashboard = () => {
                             key={level}
                             onClick={() => setFilter(level)}
                             className={`px-4 py-2 rounded-full text-sm font-semibold transition-colors border ${filter === level
-                                    ? 'bg-indigo-500 text-white border-indigo-400'
-                                    : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
+                                ? 'bg-indigo-500 text-white border-indigo-400'
+                                : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
                                 }`}
                         >
                             {level}
