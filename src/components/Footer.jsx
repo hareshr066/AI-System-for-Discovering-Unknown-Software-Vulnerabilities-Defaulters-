@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom';
 import { Shield, Github, Twitter, Linkedin, Mail } from 'lucide-react';
 
-const Footer = () => {
+const Footer = ({ className = "" }) => {
     return (
-        <footer className="w-full py-12 px-6 md:px-8 mt-20 border-t border-slate-800 bg-slate-900/50 backdrop-blur-md relative z-10">
+        <footer className={`w-full py-12 px-6 md:px-8 mt-20 border-t border-slate-800 bg-slate-900/50 backdrop-blur-md relative z-10 ${className}`}>
             <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
                 
                 <div className="md:col-span-1">

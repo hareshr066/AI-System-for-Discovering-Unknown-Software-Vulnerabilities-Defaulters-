@@ -27,8 +27,9 @@ function App() {
           <div className="absolute top-1/2 right-0 w-96 h-96 bg-cyan-500/10 rounded-full blur-[100px] pointer-events-none transform -translate-y-1/2 translate-x-1/2" />
           <div className="absolute bottom-0 left-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none transform translate-y-1/2 -translate-x-1/2" />
 
-          <div className="relative z-10 w-full mx-auto h-full">
-            <Routes>
+          <div className="relative z-10 w-full mx-auto min-h-full flex flex-col">
+            <div className="flex-1">
+              <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/upload" element={<Upload />} />
               <Route path="/scan" element={<Scan />} />
@@ -44,10 +45,11 @@ function App() {
               <Route path="/insights" element={<AiInsights />} />
               <Route path="/collaboration" element={<TeamCollaboration />} />
               <Route path="/settings" element={<SystemSettings />} />
-            </Routes>
+              </Routes>
+            </div>
+            <Footer className="mt-auto" />
           </div>
         </main>
-        <Footer />
       </div>
     </Router>
   );
