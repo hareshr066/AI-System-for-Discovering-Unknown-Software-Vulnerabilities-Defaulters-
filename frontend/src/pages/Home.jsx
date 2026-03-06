@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import HoverTrail from '../components/HoverTrail';
 import { 
   ShieldCheck, 
   Zap, 
@@ -135,19 +136,21 @@ const Home = () => {
           </div>
 
           {[
-            { step: "01", title: "Program Analysis", icon: Code2, color: "text-indigo-400", bg: "bg-indigo-500/10", border: "border-indigo-500/30" },
-            { step: "02", title: "AI Input Gen", icon: Cpu, color: "text-cyan-400", bg: "bg-cyan-500/10", border: "border-cyan-500/30" },
-            { step: "03", title: "Execution Monitor", icon: Activity, color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/30" },
-            { step: "04", title: "Anomaly Detect", icon: Filter, color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/30" },
-            { step: "05", title: "Vuln Report", icon: AlertTriangle, color: "text-red-400", bg: "bg-red-500/10", border: "border-red-500/30" }
+            { step: "01", title: "Program Analysis", icon: Code2, color: "text-indigo-400", bg: "bg-indigo-500/10", border: "border-indigo-500/30", hoverColor: "rgba(99,102,241,0.7)" },
+            { step: "02", title: "AI Input Gen", icon: Cpu, color: "text-cyan-400", bg: "bg-cyan-500/10", border: "border-cyan-500/30", hoverColor: "rgba(34,211,238,0.7)" },
+            { step: "03", title: "Execution Monitor", icon: Activity, color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/30", hoverColor: "rgba(59,130,246,0.7)" },
+            { step: "04", title: "Anomaly Detect", icon: Filter, color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/30", hoverColor: "rgba(16,185,129,0.7)" },
+            { step: "05", title: "Vuln Report", icon: AlertTriangle, color: "text-red-400", bg: "bg-red-500/10", border: "border-red-500/30", hoverColor: "rgba(239,68,68,0.7)" }
           ].map((item, i) => (
-            <motion.div key={i} variants={fadeUp} className={`flex-1 relative z-10 bg-slate-900/80 backdrop-blur-xl border ${item.border} p-6 rounded-2xl flex flex-col items-center text-center shadow-lg hover:shadow-[0_0_30px_rgba(99,102,241,0.15)] transition-all duration-300 group hover:-translate-y-2`}>
+            <HoverTrail key={i} color={item.hoverColor}>
+              <motion.div variants={fadeUp} className={`flex-1 relative z-10 bg-slate-900/80 backdrop-blur-xl border ${item.border} p-6 rounded-2xl flex flex-col items-center text-center shadow-lg hover:shadow-[0_0_30px_rgba(99,102,241,0.15)] transition-all duration-300 group hover:-translate-y-2`}>
               <div className={`w-16 h-16 rounded-full ${item.bg} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 shadow-inner`}>
                 <item.icon className={`w-8 h-8 ${item.color}`} />
               </div>
               <span className="text-xs font-bold tracking-widest text-slate-500 mb-2 uppercase">Phase {item.step}</span>
               <h3 className="text-lg font-bold text-slate-200">{item.title}</h3>
             </motion.div>
+            </HoverTrail>
           ))}
         </motion.div>
       </Section>
@@ -156,12 +159,13 @@ const Home = () => {
       <Section id="features" className="relative z-10 mt-10">
         <motion.div variants={stagger} className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {[
-            { title: "Program Analyzer", description: "Deep abstract syntax tree parsing to understand structural semantics.", icon: Terminal, glow: "hover:shadow-[0_0_40px_rgba(99,102,241,0.3)]", accent: "indigo-400", bgAccent:"bg-indigo-500" },
-            { title: "Automated Intelligent Testing", description: "Fuzzing combined with neural guidance to reach deep execution branches.", icon: Zap, glow: "hover:shadow-[0_0_40px_rgba(34,197,94,0.3)]", accent: "emerald-400", bgAccent:"bg-emerald-500" },
-            { title: "AI Anomaly Detection", description: "Detects memory leaks, buffer overflows, and race conditions via behavioral models.", icon: Fingerprint, glow: "hover:shadow-[0_0_40px_rgba(6,182,212,0.3)]", accent: "cyan-400", bgAccent:"bg-cyan-500" },
-            { title: "Vulnerability Explanation Engine", description: "Generates human-readable RCA (Root Cause Analysis) for complex vulnerabilities.", icon: Lock, glow: "hover:shadow-[0_0_40px_rgba(239,68,68,0.3)]", accent: "red-400", bgAccent:"bg-red-500" }
+            { title: "Program Analyzer", description: "Deep abstract syntax tree parsing to understand structural semantics.", icon: Terminal, glow: "hover:shadow-[0_0_40px_rgba(99,102,241,0.3)]", accent: "indigo-400", bgAccent:"bg-indigo-500", hoverColor: "rgba(99,102,241,0.7)" },
+            { title: "Automated Intelligent Testing", description: "Fuzzing combined with neural guidance to reach deep execution branches.", icon: Zap, glow: "hover:shadow-[0_0_40px_rgba(34,197,94,0.3)]", accent: "emerald-400", bgAccent:"bg-emerald-500", hoverColor: "rgba(16,185,129,0.7)" },
+            { title: "AI Anomaly Detection", description: "Detects memory leaks, buffer overflows, and race conditions via behavioral models.", icon: Fingerprint, glow: "hover:shadow-[0_0_40px_rgba(6,182,212,0.3)]", accent: "cyan-400", bgAccent:"bg-cyan-500", hoverColor: "rgba(34,211,238,0.7)" },
+            { title: "Vulnerability Explanation Engine", description: "Generates human-readable RCA (Root Cause Analysis) for complex vulnerabilities.", icon: Lock, glow: "hover:shadow-[0_0_40px_rgba(239,68,68,0.3)]", accent: "red-400", bgAccent:"bg-red-500", hoverColor: "rgba(239,68,68,0.7)" }
           ].map((feat, i) => (
-            <motion.div key={i} variants={fadeUp} className={`group relative bg-slate-800/40 border border-slate-700 p-10 rounded-3xl overflow-hidden transition-all duration-500 ${feat.glow} backdrop-blur-sm hover:bg-slate-800/80 hover:-translate-y-1`}>
+            <HoverTrail key={i} color={feat.hoverColor}>
+              <motion.div variants={fadeUp} className={`group relative bg-slate-800/40 border border-slate-700 p-10 rounded-3xl overflow-hidden transition-all duration-500 ${feat.glow} backdrop-blur-sm hover:bg-slate-800/80 hover:-translate-y-1`}>
               <div className={`absolute -top-10 -right-10 w-40 h-40 ${feat.bgAccent} opacity-10 rounded-full blur-[50px] group-hover:opacity-20 transition-opacity duration-500`} />
               <div className="relative z-10">
                 <feat.icon className={`w-10 h-10 mb-6 text-slate-400 group-hover:text-${feat.accent} transition-colors duration-300`} />
@@ -169,6 +173,7 @@ const Home = () => {
                 <p className="text-slate-400 leading-relaxed text-lg">{feat.description}</p>
               </div>
             </motion.div>
+            </HoverTrail>
           ))}
         </motion.div>
       </Section>
@@ -234,7 +239,8 @@ const Home = () => {
             </div>
 
             <div className="p-8 relative z-10 flex flex-col gap-5">
-              <motion.div 
+              <HoverTrail color="rgba(239,68,68,0.7)">
+                <motion.div 
                 initial={{ opacity: 0, x: 20 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.2 }}
@@ -252,8 +258,10 @@ const Home = () => {
                   <p className="text-xs text-slate-400 font-mono tracking-wide">auth_module.c : 142</p>
                 </div>
               </motion.div>
+              </HoverTrail>
 
-              <motion.div 
+              <HoverTrail color="rgba(234,179,8,0.7)">
+                <motion.div 
                 initial={{ opacity: 0, x: 20 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.4 }}
@@ -268,8 +276,10 @@ const Home = () => {
                   <p className="text-xs text-slate-400 font-mono tracking-wide">session_manager.cpp : 89</p>
                 </div>
               </motion.div>
+              </HoverTrail>
 
-              <motion.div 
+              <HoverTrail color="rgba(99,102,241,0.7)">
+                <motion.div 
                 initial={{ opacity: 0, x: 20 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.6 }}
@@ -284,6 +294,7 @@ const Home = () => {
                   <p className="text-xs text-slate-400 font-mono tracking-wide">worker_pool.rs : 215</p>
                 </div>
               </motion.div>
+              </HoverTrail>
             </div>
             
           </motion.div>
