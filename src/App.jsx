@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Sidebar from './components/Sidebar';
+import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
 import Upload from './pages/Upload';
@@ -19,15 +19,15 @@ import SystemSettings from './pages/SystemSettings';
 function App() {
   return (
     <Router>
-      <div className="flex h-screen overflow-hidden bg-slate-950 font-sans text-slate-200">
-        <Sidebar />
-        <main className="flex-1 overflow-x-hidden p-6 md:p-8 relative overflow-y-auto">
+      <div className="flex flex-col h-screen overflow-hidden bg-slate-950 font-sans text-slate-200">
+        <Navbar />
+        <main className="flex-1 w-full overflow-x-hidden relative overflow-y-auto">
           {/* Subtle background effects */}
           <div className="absolute top-0 inset-x-0 h-96 bg-gradient-to-b from-indigo-500/10 to-transparent pointer-events-none" />
           <div className="absolute top-1/2 right-0 w-96 h-96 bg-cyan-500/10 rounded-full blur-[100px] pointer-events-none transform -translate-y-1/2 translate-x-1/2" />
           <div className="absolute bottom-0 left-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none transform translate-y-1/2 -translate-x-1/2" />
 
-          <div className="relative z-10 w-full mx-auto min-h-full flex flex-col">
+          <div className="relative z-10 w-full mx-auto min-h-full flex flex-col p-6 pt-[100px] md:p-8 md:pt-[108px]">
             <div className="flex-1">
               <Routes>
               <Route path="/" element={<Home />} />
@@ -47,7 +47,7 @@ function App() {
               <Route path="/settings" element={<SystemSettings />} />
               </Routes>
             </div>
-            <Footer className="mt-auto" />
+            <Footer className="mt-6" />
           </div>
         </main>
       </div>
