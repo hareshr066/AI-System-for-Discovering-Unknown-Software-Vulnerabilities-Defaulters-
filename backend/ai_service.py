@@ -1,17 +1,19 @@
 import os
 import json
-from groq import Groq
+import google.generativeai as genai
 from dotenv import load_dotenv
 
-# Load environment variables
 load_dotenv()
 
-# Initialize Groq client
-client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
+# Enable Gemini API using user-provided key
+genai.configure(api_key="AIzaSyCdO0P2bTIZ_Hu1s9GCdHVLSW5DOSGsopY")
+
+# Specify the reliable JSON-enabling model
+model = genai.GenerativeModel('gemini-2.5-flash')
 
 def analyze_code_with_ai(file_name: str, code_content: str):
     """
-    Sends code content to Groq API (Llama model) to detect vulnerabilities.
+    Sends code content to Google Gemini API to detect vulnerabilities.
     Expects a JSON string list in response.
     """
     prompt = f"""
@@ -35,34 +37,56 @@ def analyze_code_with_ai(file_name: str, code_content: str):
     Do not include any other text besides the JSON array. Make sure the JSON is purely formatted without markdown blocks if possible, or only inside a single block.
     """
 
-    try:
-        chat_completion = client.chat.completions.create(
-            messages=[
-                {
-                    "role": "system",
-                    "content": "You are an expert security code analyzer. You strictly respond only with valid JSON arrays representing vulnerabilities found, without conversational padding."
-                },
-                {
-                    "role": "user",
-                    "content": prompt,
-                }
-            ],
-            model="llama3-8b-8192",
-            temperature=0.1,
-        )
+    import time
+    from google.api_core.exceptions import ResourceExhausted
 
-        response_text = chat_completion.choices[0].message.content.strip()
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            response = model.generate_content(
+                prompt,
+                generation_config=genai.types.GenerationConfig(
+                    temperature=0.1,
+                ),
+            )
 
-        # Clean up response if the AI bundled it in markdown triple backticks
-        if response_text.startswith("```"):
-            lines = response_text.splitlines()
-            if lines[0].startswith("```"):
-                lines = lines[1:]
-            if lines and lines[-1].startswith("```"):
-                lines = lines[:-1]
-            response_text = "\n".join(lines).strip()
+            text = response.text.strip()
 
-        return json.loads(response_text)
-    except Exception as e:
-        print(f"Error analyzing {file_name} with AI: {e}")
-        return []
+            # Clean up response if the AI bundled it in markdown triple backticks
+            if text.startswith("```"):
+                lines = text.splitlines()
+                if len(lines) > 0 and lines[0].startswith("```"):
+                    lines = lines[1:]
+                if len(lines) > 0 and lines[-1].startswith("```"):
+                    lines = lines[:-1]
+                text = "\n".join(lines).strip()
+
+            if text.lower().startswith("json"):
+                text = text[4:].strip()
+
+            parsed_json = json.loads(text)
+
+            # Structure the data reliably for the scanner generator
+            if not isinstance(parsed_json, list):
+                if isinstance(parsed_json, dict) and "issues" in parsed_json:
+                    return parsed_json["issues"]
+                elif isinstance(parsed_json, dict):
+                    return [parsed_json]
+                else:
+                    return []
+            return parsed_json
+
+        except ResourceExhausted as e:
+            if attempt < max_retries - 1:
+                print(f"Gemini API rate limit reached. Waiting 10 seconds... (Attempt {attempt+1}/{max_retries})")
+                time.sleep(10)
+            else:
+                print("Gemini API Rate Limit completely exhausted. Try again later.")
+                return []
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            print(f"Error analyzing {file_name} with Gemini AI: {e}")
+            return []
+
+    return []
