@@ -7,6 +7,7 @@ const Upload = () => {
     const [isDragging, setIsDragging] = useState(false);
     const [error, setError] = useState("");
     const [isLoaded, setIsLoaded] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -15,30 +16,30 @@ const Upload = () => {
 
     const handleStartScan = async () => {
         if (!file) return;
+        setIsUploading(true);
+        setError("");
+
+        const formData = new FormData();
+        formData.append('file', file);
 
         try {
-            // Set an uploading state so user knows it's working
-            setError("Uploading file to secure server...");
-
-            const formData = new FormData();
-            formData.append("file", file);
-
-            const response = await fetch("http://localhost:8000/upload-folder", {
-                method: "POST",
+            const response = await fetch('http://localhost:8000/upload-folder', {
+                method: 'POST',
                 body: formData,
             });
 
-            if (response.ok) {
-                // File successfully sent to Python
-                setError("");
-                navigate('/scan');
-            } else {
-                const errData = await response.json();
-                setError(errData.detail || "Failed to upload file to engine.");
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || "Failed to upload file");
             }
+
+            // File uploaded successfully, now navigate to the scan page
+            // The scan page will actually trigger the AI analysis
+            navigate('/scan');
         } catch (err) {
-            console.error(err);
-            setError("Network error: Could not reach backend server.");
+            console.error("Upload error:", err);
+            setError(err.message || "An error occurred during upload. Is the backend running?");
+            setIsUploading(false);
         }
     };
 
@@ -311,14 +312,15 @@ const Upload = () => {
                             <div className="mt-10 w-full relative">
                                 <button
                                     onClick={handleStartScan}
-                                    disabled={!file}
-                                    className={`w-full group relative flex items-center justify-center gap-3 px-6 py-5 rounded-xl font-bold text-lg transition-all duration-500 overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 focus-visible:ring-indigo-500 ${file
-                                            ? 'bg-white text-slate-950 hover:scale-[1.02] shadow-[0_0_40px_rgba(255,255,255,0.2)]'
-                                            : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
-                                        }`}
+                                    disabled={!file || isUploading}
+                                    className={`w-full group relative flex items-center justify-center gap-3 px-6 py-5 rounded-xl font-bold text-lg transition-all duration-500 overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 focus-visible:ring-indigo-500 ${
+                                        file && !isUploading
+                                        ? 'bg-white text-slate-950 hover:scale-[1.02] shadow-[0_0_40px_rgba(255,255,255,0.2)]'
+                                        : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
+                                    }`}
                                 >
                                     {/* Shining effect on hover for active button */}
-                                    {file && (
+                                    {file && !isUploading && (
                                         <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-slate-200/50 to-transparent group-hover:animate-[shimmer_1.5s_infinite] pointer-events-none" />
                                     )}
                                     <style>{`
@@ -326,9 +328,12 @@ const Upload = () => {
                                             100% { transform: translateX(100%); }
                                         }
                                     `}</style>
-
-                                    <ShieldCheck className={`w-6 h-6 transition-transform duration-300 ${file ? 'group-hover:scale-110' : ''}`} />
-                                    <span className="relative z-10">Start Vulnerability Scan</span>
+                                    {isUploading ? (
+                                        <div className="w-6 h-6 border-2 border-slate-500 border-t-slate-300 rounded-full animate-spin"></div>
+                                    ) : (
+                                        <ShieldCheck className={`w-6 h-6 transition-transform duration-300 ${file ? 'group-hover:scale-110' : ''}`} />
+                                    )}
+                                    <span className="relative z-10">{isUploading ? 'Uploading & Preparing...' : 'Start Vulnerability Scan'}</span>
                                 </button>
                             </div>
 
