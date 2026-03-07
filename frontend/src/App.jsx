@@ -3,6 +3,7 @@ import { AnimatePresence } from 'framer-motion';
 import PageTransition from './components/PageTransition';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import ScrollToTop from './components/ScrollToTop';
 import Home from './pages/Home';
 import Upload from './pages/Upload';
 import Scan from './pages/Scan';
@@ -50,6 +51,7 @@ function AnimatedRoutes() {
 function App() {
   return (
     <Router>
+      <ScrollToTop />
       <div className="flex flex-col h-screen overflow-hidden bg-slate-950 font-sans text-slate-200">
         <Navbar />
         <main className="flex-1 w-full overflow-x-hidden relative overflow-y-auto">
