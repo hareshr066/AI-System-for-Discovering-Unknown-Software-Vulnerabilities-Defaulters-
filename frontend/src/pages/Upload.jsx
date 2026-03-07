@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UploadCloud, ShieldCheck, File as FileIcon, X, CheckCircle2, FileCode2, AlertCircle } from 'lucide-react';
+import ParticleNetwork from '../components/ParticleNetwork';
 
 const Upload = () => {
     const [file, setFile] = useState(null);
@@ -104,85 +105,11 @@ const Upload = () => {
     };
 
     return (
-        <div className={`relative min-h-[100dvh] bg-[#020617] text-[#F9FAFB] font-sans flex flex-col items-center py-6 px-4 sm:px-6 lg:px-8 transition-opacity duration-1000 ${isLoaded ? 'opacity-100' : 'opacity-0'} overflow-hidden`}>
+        <>
+        <ParticleNetwork />
+        <div className="relative min-h-screen flex flex-col items-center py-6 px-4 sm:px-6 lg:px-8 transition-opacity duration-1000 ${isLoaded ? 'opacity-100' : 'opacity-0'} z-10">
 
-            {/* Height.app-style Animation Styles */}
             <style>{`
-                /* Subtle background grid */
-                .tech-grid {
-                    position: absolute;
-                    inset: 0;
-                    background-size: 50px 50px;
-                    background-image:
-                        linear-gradient(to right, rgba(99, 102, 241, 0.04) 1px, transparent 1px),
-                        linear-gradient(to bottom, rgba(99, 102, 241, 0.04) 1px, transparent 1px);
-                    mask-image: linear-gradient(to bottom, black 40%, transparent 100%), radial-gradient(ellipse at center, black 20%, transparent 80%);
-                    -webkit-mask-image: radial-gradient(ellipse at center, black 40%, transparent 80%);
-                    z-index: 1;
-                    pointer-events: none;
-                }
-
-                /* Slow rotating glowing orb in background */
-                @keyframes orbitSlow {
-                    0% { transform: translate(-50%, -50%) rotate(0deg) scale(1); }
-                    50% { transform: translate(-50%, -40%) rotate(180deg) scale(1.1); }
-                    100% { transform: translate(-50%, -50%) rotate(360deg) scale(1); }
-                }
-                .glow-orb {
-                    position: absolute;
-                    top: 50%;
-                    left: 50%;
-                    width: 800px;
-                    height: 800px;
-                    background: conic-gradient(from 90deg at 50% 50%, rgba(99,102,241,0.05) 0%, rgba(34,197,94,0.02) 25%, rgba(99,102,241,0.05) 50%, rgba(2,6,23,0) 75%, rgba(99,102,241,0.05) 100%);
-                    filter: blur(60px);
-                    border-radius: 50%;
-                    animation: orbitSlow 25s linear infinite;
-                    z-index: 0;
-                    pointer-events: none;
-                }
-
-                /* Pulse drop zone */
-                @keyframes pulseGlow {
-                    0% { box-shadow: 0 0 0 0 rgba(99,102,241,0.4); }
-                    70% { box-shadow: 0 0 0 20px rgba(99,102,241,0); }
-                    100% { box-shadow: 0 0 0 0 rgba(99,102,241,0); }
-                }
-                .drop-zone-active {
-                    animation: pulseGlow 2s infinite;
-                    border-color: #6366F1 !important;
-                    background: rgba(99,102,241,0.08) !important;
-                }
-
-                /* Animated sweeping border for the main card */
-                .animated-card {
-                    position: relative;
-                    background: rgba(15, 23, 42, 0.6);
-                    backdrop-filter: blur(20px);
-                    border-radius: 1.5rem;
-                    z-index: 10;
-                }
-                .animated-card::before {
-                    content: "";
-                    position: absolute;
-                    inset: -1px;
-                    border-radius: 1.6rem;
-                    background: linear-gradient(90deg, rgba(51,65,85,0.4), rgba(99,102,241,0.8), rgba(51,65,85,0.4), rgba(34,197,94,0.4));
-                    background-size: 300% 100%;
-                    z-index: -1;
-                    animation: sweepBorder 6s linear infinite;
-                    opacity: 0.5;
-                    transition: opacity 0.5s ease;
-                }
-                .animated-card:hover::before {
-                    opacity: 1;
-                }
-                @keyframes sweepBorder {
-                    0% { background-position: 0% 0%; }
-                    100% { background-position: 100% 0%; }
-                }
-
-                /* Base entrance animation */
                 @keyframes cardEnter {
                     0% { transform: translateY(30px) scale(0.97); opacity: 0; filter: blur(10px); }
                     100% { transform: translateY(0) scale(1); opacity: 1; filter: blur(0); }
@@ -190,22 +117,23 @@ const Upload = () => {
                 .animate-card-enter {
                     animation: cardEnter 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
                 }
+                @keyframes shimmer {
+                    100% { transform: translateX(100%); }
+                }
             `}</style>
 
-            {/* Background Elements */}
-            <div className="tech-grid"></div>
-            <div className="glow-orb"></div>
+            {/* Background Elements - Removed, using CinematicBackground */}
 
             {/* Top Light Flare */}
-            <div className="absolute top-0 inset-x-0 h-px w-full bg-gradient-to-r from-transparent via-indigo-500 to-transparent opacity-50 shadow-[0_0_20px_rgba(99,102,241,0.5)] z-20"></div>
+            <div className="absolute top-0 inset-x-0 h-px w-full bg-gradient-to-r from-transparent via-[#00F3FF] to-transparent opacity-50 shadow-[0_0_20px_rgba(0,243,255,0.5)] z-20"></div>
 
             {/* Centered Main Section */}
             <main className="relative z-10 w-full flex flex-col items-center justify-center flex-1 pb-20 pt-10">
                 <div className="text-center mb-12 w-full max-w-2xl px-4 animate-card-enter" style={{ animationDelay: '0.1s' }}>
-                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-medium mb-6 backdrop-blur-md">
+                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#00F3FF]/10 border border-[#00F3FF]/20 text-[#00F3FF] text-sm font-medium mb-6 backdrop-blur-md">
                         <span className="relative flex h-2 w-2">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00F3FF] opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00F3FF]"></span>
                         </span>
                         Secure Pipeline Active
                     </div>
@@ -219,7 +147,8 @@ const Upload = () => {
                 </div>
 
                 {/* Upload Card */}
-                <div className={`w-full max-w-2xl animated-card p-1 sm:p-2 shadow-[0_0_50px_rgba(0,0,0,0.5)] ${isLoaded ? 'animate-card-enter' : 'opacity-0'}`} style={{ animationDelay: '0.2s' }}>
+                <div className="w-full max-w-2xl bg-[rgba(10,10,15,0.6)] backdrop-blur-xl border border-[#00F3FF]/10 rounded-3xl p-1 sm:p-2 shadow-[0_0_50px_rgba(0,0,0,0.5)] relative overflow-hidden" style={{ animationDelay: '0.2s' }}>
+                    <div className="absolute inset-0 border border-[#00F3FF]/20 rounded-3xl pointer-events-none"></div>
                     <div className="bg-slate-900/90 rounded-[1.3rem] p-8 sm:p-10 w-full h-full relative overflow-hidden">
 
                         <div className="relative z-10 flex flex-col items-center w-full">
@@ -232,12 +161,12 @@ const Upload = () => {
                                     onDragOver={handleDrag}
                                     onDrop={handleDrop}
                                     htmlFor="code-upload"
-                                    className={`w-full flex flex-col items-center justify-center py-16 px-6 border-2 border-dashed rounded-xl cursor-pointer transition-all duration-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:border-transparent ${isDragging
-                                            ? 'drop-zone-active'
-                                            : 'border-slate-700 bg-slate-800/20 hover:border-indigo-500/50 hover:bg-indigo-500/5'
+                                    className={`w-full flex flex-col items-center justify-center py-16 px-6 border-2 border-dashed rounded-xl cursor-pointer transition-all duration-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00F3FF] focus-visible:border-transparent ${isDragging
+                                            ? 'border-[#00F3FF] bg-[#00F3FF]/10 shadow-[0_0_20px_rgba(0,243,255,0.4)]'
+                                            : 'border-slate-700 bg-slate-800/20 hover:border-[#00F3FF]/50 hover:bg-[#00F3FF]/5'
                                         }`}
                                 >
-                                    <div className={`mb-6 transition-all duration-500 ${isDragging ? 'text-indigo-400 scale-125 drop-shadow-[0_0_15px_rgba(99,102,241,0.6)]' : 'text-slate-500 group-hover/card:text-indigo-400'}`}>
+                                    <div className={`mb-6 transition-all duration-500 ${isDragging ? 'text-[#00F3FF] scale-125 drop-shadow-[0_0_15px_rgba(0,243,255,0.6)]' : 'text-slate-500 group-hover/card:text-[#00F3FF]'}`}>
                                         <UploadCloud className="w-16 h-16" strokeWidth={1} />
                                     </div>
                                     <h3 className="text-xl font-semibold mb-2 text-slate-200">
@@ -267,12 +196,12 @@ const Upload = () => {
                                 </label>
                             ) : (
                                 // Uploaded File Area
-                                <div className="w-full flex items-center justify-between p-6 bg-slate-950 border border-indigo-500/30 rounded-xl animate-in fade-in zoom-in-95 duration-500 shadow-[0_0_30px_rgba(99,102,241,0.1)] relative overflow-hidden">
-                                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-transparent pointer-events-none"></div>
+                                <div className="w-full flex items-center justify-between p-6 bg-slate-950 border border-[#00F3FF]/30 rounded-xl animate-in fade-in zoom-in-95 duration-500 shadow-[0_0_30px_rgba(0,243,255,0.1)] relative overflow-hidden">
+                                    <div className="absolute inset-0 bg-gradient-to-r from-[#00F3FF]/10 to-transparent pointer-events-none"></div>
 
                                     <div className="flex items-center gap-5 min-w-0 relative z-10">
-                                        <div className="flex-shrink-0 p-4 bg-indigo-500/10 rounded-xl border border-indigo-500/20 shadow-[0_0_15px_rgba(99,102,241,0.2)]">
-                                            <FileIcon className="w-8 h-8 text-indigo-400" strokeWidth={1.5} />
+                                        <div className="flex-shrink-0 p-4 bg-[#00F3FF]/10 rounded-xl border border-[#00F3FF]/20 shadow-[0_0_15px_rgba(0,243,255,0.2)]">
+                                            <FileIcon className="w-8 h-8 text-[#00F3FF]" strokeWidth={1.5} />
                                         </div>
                                         <div className="min-w-0 flex-1">
                                             <p className="text-base font-semibold text-slate-200 truncate pr-4">
@@ -290,7 +219,7 @@ const Upload = () => {
                                         </div>
                                         <button
                                             onClick={removeFile}
-                                            className="p-2.5 text-slate-500 hover:text-white hover:bg-slate-800 transition-all rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 hover:shadow-lg"
+                                            className="p-2.5 text-slate-500 hover:text-white hover:bg-slate-800 transition-all rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00F3FF] hover:shadow-lg"
                                             aria-label="Replace file"
                                         >
                                             <X className="w-5 h-5" />
@@ -313,9 +242,9 @@ const Upload = () => {
                                 <button
                                     onClick={handleStartScan}
                                     disabled={!file || isUploading}
-                                    className={`w-full group relative flex items-center justify-center gap-3 px-6 py-5 rounded-xl font-bold text-lg transition-all duration-500 overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 focus-visible:ring-indigo-500 ${
+                                    className={`w-full group relative flex items-center justify-center gap-3 px-6 py-5 rounded-xl font-bold text-lg transition-all duration-500 overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 focus-visible:ring-[#00F3FF] ${
                                         file && !isUploading
-                                        ? 'bg-white text-slate-950 hover:scale-[1.02] shadow-[0_0_40px_rgba(255,255,255,0.2)]'
+                                        ? 'bg-[#00F3FF] text-slate-950 hover:scale-[1.02] shadow-[0_0_40px_rgba(0,243,255,0.4)]'
                                         : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
                                     }`}
                                 >
@@ -342,6 +271,7 @@ const Upload = () => {
                 </div>
             </main>
         </div>
+        </>
     );
 };
 

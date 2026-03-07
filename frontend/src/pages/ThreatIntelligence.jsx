@@ -8,6 +8,7 @@ import {
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer 
 } from 'recharts';
+import ParticleNetwork from '../components/ParticleNetwork';
 
 const threatData = [
   { time: '00:00', attacks: 1200, mitigated: 1100 },
@@ -68,7 +69,9 @@ const Card = ({ children, className = '', delay = 0 }) => (
 
 const ThreatIntelligence = () => {
   return (
-    <div className="w-full max-w-7xl mx-auto pb-12 overflow-hidden">
+    <>
+    <ParticleNetwork />
+    <div className="w-full max-w-7xl mx-auto pb-12 overflow-hidden relative z-10">
       {/* Header Section */}
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
@@ -326,7 +329,8 @@ const ThreatIntelligence = () => {
           </div>
         </Card>
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 
