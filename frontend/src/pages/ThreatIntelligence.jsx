@@ -68,7 +68,7 @@ const Card = ({ children, className = '', delay = 0 }) => (
 
 const ThreatIntelligence = () => {
   return (
-    <div className="w-full max-w-7xl mx-auto pb-12">
+    <div className="w-full max-w-7xl mx-auto pb-12 overflow-hidden">
       {/* Header Section */}
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
