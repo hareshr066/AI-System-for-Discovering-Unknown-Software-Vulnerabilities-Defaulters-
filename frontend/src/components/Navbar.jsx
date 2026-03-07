@@ -24,6 +24,7 @@ const navItems = [
     { name: 'Vulnerability Explorer', path: '/vulnerabilities', icon: Shield },
     { name: 'Threat Intelligence', path: '/threat-intelligence', icon: ShieldAlert },
     { name: 'Scan History', path: '/history', icon: History },
+    { name: 'Security Reports', path: '/reports', icon: FileText },
 ];
 
 const Navbar = () => {
@@ -45,11 +46,16 @@ const Navbar = () => {
         navigate('/login');
     };
 
+    const SettingsItem = { name: 'System Settings', path: '/settings', icon: Settings };
+
     return (
+        // The container wrapper provides fixed positioning
         <div className="fixed top-0 inset-x-0 z-50 flex justify-center w-full px-4 sm:px-6 pt-4 sm:pt-6 pointer-events-none transition-all duration-300">
+            {/* The actual navbar acting as a floating pill */}
             <header 
                 className="pointer-events-auto w-full max-w-[95%] 2xl:max-w-[1400px] h-16 bg-[rgba(15,23,42,0.85)] border border-[#1f2937] flex items-center justify-between shadow-[0_10px_40px_-5px_rgba(0,0,0,0.8)] rounded-full backdrop-blur-xl px-5 sm:px-8"
             >
+                {/* Left: Logo */}
                 <div className="flex flex-shrink-0 items-center">
                     <Link to="/" className="flex items-center gap-3 transition-colors text-[#818CF8]">
                         <div className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/20 shadow-[0_0_15px_rgba(99,102,241,0.2)]">
@@ -61,6 +67,7 @@ const Navbar = () => {
                     </Link>
                 </div>
 
+                {/* Center: Desktop Nav */}
                 <nav className="hidden xl:flex flex-1 justify-center items-center gap-1 2xl:gap-3 h-full px-2 overflow-hidden">
                     {navItems.map((item) => {
                         const isActive = location.pathname === item.path ||
@@ -85,6 +92,7 @@ const Navbar = () => {
                     })}
                 </nav>
 
+                {/* Right: Settings & Hamburger */}
                 <div className="flex flex-shrink-0 items-center gap-2">
                     {!user ? (
                         <>
@@ -118,6 +126,13 @@ const Navbar = () => {
                             </button>
                         </>
                     )}
+                    <Link
+                        to={SettingsItem.path}
+                        className="hidden md:flex p-2.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-full transition-all ml-2"
+                        title="System Settings"
+                    >
+                        <Settings className="w-5 h-5" />
+                    </Link>
 
                     <button
                         className="xl:hidden p-2 text-slate-400 hover:text-white transition-colors bg-slate-800 rounded-lg ml-3"
@@ -128,6 +143,7 @@ const Navbar = () => {
                     </button>
                 </div>
 
+                {/* Mobile / Tablet Menu Dropdown */}
                 {isMenuOpen && (
                     <div className="absolute top-[calc(100%+16px)] left-0 w-full bg-[rgba(15,23,42,0.95)] backdrop-blur-2xl border border-slate-800 rounded-2xl flex flex-col p-4 xl:hidden shadow-[0_20px_50px_-10px_rgba(0,0,0,0.8)] max-h-[calc(100vh-100px)] overflow-y-auto">
                         {navItems.map((item) => {
@@ -186,6 +202,18 @@ const Navbar = () => {
                                 </button>
                             </>
                         )}
+                        <Link
+                            to={SettingsItem.path}
+                            onClick={() => setIsMenuOpen(false)}
+                            className={`flex items-center gap-4 px-5 py-4 rounded-xl transition-all duration-200 ${
+                                location.pathname.startsWith(SettingsItem.path)
+                                    ? 'bg-indigo-500/10 text-indigo-400 font-semibold border border-indigo-500/20'
+                                    : 'text-slate-400 hover:bg-slate-800/80 hover:text-white border border-transparent'
+                            }`}
+                        >
+                            <Settings className="w-5 h-5 text-slate-500" />
+                            <span>System Settings</span>
+                        </Link>
                     </div>
                 )}
             </header>
