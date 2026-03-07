@@ -3,6 +3,7 @@ import VulnerabilityCard from '../components/VulnerabilityCard';
 import { Activity, ShieldCheck, ShieldAlert, Shield, AlertTriangle, Bug, FileCode } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Cell, PieChart, Pie } from 'recharts';
+import ParticleNetwork from '../components/ParticleNetwork';
 
 // Export dynamically active vulnerabilities for details page routing
 export let activeVulnerabilities = [];
@@ -111,8 +112,10 @@ const Dashboard = () => {
     };
 
     return (
+        <>
+        <ParticleNetwork />
         <motion.div 
-            className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 overflow-hidden"
+            className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 overflow-hidden relative z-10"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
@@ -334,7 +337,8 @@ const Dashboard = () => {
                     </div>
                 )}
             </motion.div>
-        </motion.div>
+            </motion.div>
+        </>
     );
 };
 

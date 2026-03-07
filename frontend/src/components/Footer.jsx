@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BrainCircuit, Github, Linkedin, Mail, Send, X, Info } from 'lucide-react';
+import { Github, Linkedin, Mail, X, Info } from 'lucide-react';
+import ThreatLensLogo from '../assets/ThreatLenslogo.jpeg';
 
 const Footer = ({ className = "" }) => {
     const [selectedProduct, setSelectedProduct] = useState(null);
@@ -10,12 +11,12 @@ const Footer = ({ className = "" }) => {
     const productInfo = {
         "Scanner Engine": "Our core neural system that performs recursive AST-level analysis to detect semantic anomalies and complex logic bugs. It utilizes advanced machine learning models trained on millions of CVEs to predict and prevent future exploits before they manifest in production environments.",
         "Analytics Dashboard": "Real-time visualization of your attack surface, threat trends, and autonomous remediation performance across all repositories. Get deep insights into vulnerabilities, resolution times, and the overall security health of your entire software ecosystem through interactive heatmaps and predictive charts.",
-        "API Integration": "Deploy NexusScan via secure REST endpoints or our native CI/CD plugins for automated security at every build step. Seamlessly integrate with GitHub, GitLab, Jenkins, and Azure DevOps to ensure your code is scanned and secured automatically during every push or pull request.",
+        "API Integration": "Deploy ThreatLens via secure REST endpoints or our native CI/CD plugins for automated security at every build step. Seamlessly integrate with GitHub, GitLab, Jenkins, and Azure DevOps to ensure your code is scanned and secured automatically during every push or pull request.",
         "Enterprise Data": "High-fidelity threat intelligence feeds and dedicated sandboxing environments for mission-critical software assets. Access exclusive datasets and perform deep forensic analysis in isolated, secure containers to understand the full impact of potential threats without risking your infrastructure."
     };
 
     const resourceInfo = {
-        "Documentation": "Comprehensive guides on integrating NexusScan, configuring neural scanning parameters, and managing security policies. Explore our multi-layered approach to security, including detailed API references, implementation best practices, and troubleshooting tips for complex enterprise deployments.",
+        "Documentation": "Comprehensive guides on integrating ThreatLens, configuring neural scanning parameters, and managing security policies. Explore our multi-layered approach to security, including detailed API references, implementation best practices, and troubleshooting tips for complex enterprise deployments.",
         "Security Blog": "Updates on recent zero-day discovery techniques, AI-driven remediation case studies, and industry security trends. Stay ahead of the curve with expert analysis from our team of researchers and developers who are pioneering the future of autonomous software defense.",
         "Research Papers": "Deep dives into our neural architecture, autonomous patching algorithms, and formal verification of remediated code. Read our peer-reviewed publications on how we combine symbolic execution with deep learning to achieve unprecedented accuracy in vulnerability detection."
     };
@@ -97,17 +98,17 @@ const Footer = ({ className = "" }) => {
                 <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-8 mb-6 footer-grid">
                     <div className="md:col-span-1">
                         <Link to="/" className="flex items-center gap-2 mb-3 group footer-brand">
-                            <BrainCircuit className="w-7 h-7 text-[#00F3FF] transition-all duration-300 group-hover:drop-shadow-[0_0_10px_#00F3FF] footer-icon" />
-                            <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-[#00F3FF] footer-logo tracking-tighter">NexusScan</span>
+                            <img src={ThreatLensLogo} alt="ThreatLens" className="w-7 h-7 rounded-full object-cover transition-all duration-300 group-hover:drop-shadow-[0_0_10px_#00F3FF] footer-icon" />
+                            <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-[#00F3FF] footer-logo tracking-tighter">ThreatLens</span>
                         </Link>
                         <p className="text-slate-500 text-[13px] leading-relaxed mb-4 footer-brand-description max-w-[220px] font-medium">
                             Advancing autonomous software security through AI-driven discovery and remediation.
                         </p>
                         <div className="flex items-center gap-4 text-slate-500 footer-social-icons">
-                            <a href="https://github.com" target="_blank" rel="noreferrer" className="hover:text-[#00F3FF] transition-all duration-300 hover:scale-125">
+                            <a href="https://github.com/hareshr066/AI-System-for-Discovering-Unknown-Software-Vulnerabilities-Defaulters-" target="_blank" rel="noreferrer" className="hover:text-[#00F3FF] transition-all duration-300 hover:scale-125">
                                 <Github size={18} />
                             </a>
-                            <a href="https://linkedin.com" target="_blank" rel="noreferrer" className="hover:text-[#00F3FF] transition-all duration-300 hover:scale-125">
+                            <a href="https://www.linkedin.com/in/team-defaulters-22b8b43b5/" target="_blank" rel="noreferrer" className="hover:text-[#00F3FF] transition-all duration-300 hover:scale-125">
                                 <Linkedin size={18} />
                             </a>
                         </div>
@@ -146,38 +147,19 @@ const Footer = ({ className = "" }) => {
                     </div>
 
                     <div className="md:col-span-1 footer-contact">
-                        <h3 className="text-white font-black text-[10px] uppercase tracking-[0.25em] mb-4 opacity-30">Nexus Contact</h3>
-                        <form className="flex flex-col gap-2 footer-contact-form" onSubmit={(e) => e.preventDefault()}>
-                            <div className="grid grid-cols-2 gap-2">
-                                <input
-                                    type="text"
-                                    placeholder="Alias"
-                                    className="w-full bg-[#08080B] border border-white/[0.02] rounded-lg py-1.5 px-3 text-[11px] text-white placeholder-slate-700 focus:outline-none focus:border-[#00F3FF]/30 transition-all font-bold"
-                                />
-                                <div className="relative">
-                                    <Mail className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-800" />
-                                    <input
-                                        type="email"
-                                        placeholder="Secure Email"
-                                        className="w-full bg-[#08080B] border border-white/[0.02] rounded-lg py-1.5 pl-7 pr-3 text-[11px] text-white placeholder-slate-700 focus:outline-none focus:border-[#00F3FF]/30 transition-all font-bold"
-                                    />
-                                </div>
-                            </div>
-                            <input
-                                placeholder="Query content..."
-                                className="w-full bg-[#08080B] border border-white/[0.02] rounded-lg py-2 px-3 text-[11px] text-white placeholder-slate-700 focus:outline-none focus:border-[#00F3FF]/30 transition-all resize-none shadow-sm font-bold"
-                            />
-                            <button type="submit" className="flex items-center justify-center gap-2 bg-[#00F3FF] hover:bg-white text-[#030305] px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all duration-700 hover:shadow-[0_0_15px_rgba(0,243,255,0.3)] mt-0.5">
-                                <span>Execute Uplink</span>
-                                <Send size={10} />
-                            </button>
-                        </form>
+                        <h3 className="text-white font-black text-[10px] uppercase tracking-[0.25em] mb-4 opacity-30">Contact</h3>
+                        <div className="flex flex-col gap-3">
+                            <a href="mailto:threatlens1@gmail.com" className="flex items-center gap-2 text-slate-400 hover:text-[#00F3FF] transition-all duration-300 text-sm group">
+                                <Mail className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                                <span className="font-medium">threatlens1@gmail.com</span>
+                            </a>
+                        </div>
                     </div>
                 </div>
 
                 <div className="max-w-7xl mx-auto pt-4 border-t border-white/[0.03] flex flex-col md:flex-row items-center justify-between gap-4 footer-bottom">
                     <p className="text-slate-600 text-[9px] font-black uppercase tracking-[0.2em] opacity-40">
-                        &copy; {new Date().getFullYear()} NexusScan. Autonomous Defense.
+                        &copy; {new Date().getFullYear()} ThreatLens. Autonomous Defense.
                     </p>
                     <div className="flex gap-10 text-[10px] font-black uppercase tracking-widest">
                         <Link to="/privacy-policy" className="text-slate-700 hover:text-[#00F3FF] transition-all duration-300">Privacy Protocol</Link>

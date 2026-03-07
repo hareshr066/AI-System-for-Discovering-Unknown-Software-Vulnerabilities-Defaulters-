@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import ThreatLensLogo from '../assets/ThreatLenslogo.jpeg';
 import {
     Home,
     LayoutDashboard,
@@ -58,9 +59,9 @@ const Navbar = () => {
                 {/* Left: Logo */}
                 <div className="flex flex-shrink-0 items-center">
                     <Link to="/" className="flex items-center gap-2 group transition-all duration-300">
-                        <BrainCircuit className="w-7 h-7 text-[#00F3FF] transition-all duration-300 group-hover:drop-shadow-[0_0_10px_#00F3FF]" />
+                        <img src={ThreatLensLogo} alt="ThreatLens" className="w-8 h-8 rounded-full object-cover transition-all duration-300 group-hover:drop-shadow-[0_0_10px_#00F3FF]" />
                         <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-[#00F3FF] tracking-tighter">
-                            NexusScan
+                            ThreatLens
                         </span>
                     </Link>
                 </div>
