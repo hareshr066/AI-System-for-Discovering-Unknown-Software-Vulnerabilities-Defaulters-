@@ -112,7 +112,7 @@ const Dashboard = () => {
 
     return (
         <motion.div 
-            className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8"
+            className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 overflow-hidden"
             variants={containerVariants}
             initial="hidden"
             animate="visible"

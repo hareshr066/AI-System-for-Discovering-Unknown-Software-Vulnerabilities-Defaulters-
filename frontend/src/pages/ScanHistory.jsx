@@ -159,7 +159,7 @@ const ScanHistory = () => {
     };
 
     return (
-        <div className="p-6 relative">
+        <div className="p-6 relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-transparent to-purple-500/5 pointer-events-none" />
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(99,102,241,0.05),transparent_50%)] pointer-events-none" />
             
