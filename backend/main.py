@@ -10,8 +10,12 @@ import uvicorn
 from models import ScanResult, VulnerabilityIssue
 from scanner import scan_directory
 from utils import extract_zip, clear_directory
+from auth import router as auth_router
 
 app = FastAPI(title="AI Vulnerability Scanner Backend")
+
+# Include auth router
+app.include_router(auth_router, prefix="/auth", tags=["authentication"])
 
 # Enable CORS for React frontend
 app.add_middleware(

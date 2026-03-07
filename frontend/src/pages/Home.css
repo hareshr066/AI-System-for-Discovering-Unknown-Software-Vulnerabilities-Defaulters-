@@ -115,6 +115,20 @@
 }
 
 /* Hero & Section Layout */
+.hero-title {
+    font-size: clamp(2rem, 8vw, 5.5rem);
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 1.05;
+    text-align: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    color: #F3F4F6;
+    z-index: 10;
+    position: relative;
+    padding: 0 1rem;
+}
+
 .home-hero {
     position: relative;
     min-height: 100vh;
@@ -163,6 +177,7 @@
     background: linear-gradient(to right, #00F3FF, #BC13FE, #00F3FF);
     background-size: 200% auto;
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
     filter: drop-shadow(0 0 20px rgba(0, 243, 255, 0.6));
     display: inline-block;
