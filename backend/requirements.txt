@@ -4,3 +4,7 @@ python-multipart
 groq
 pydantic
 python-dotenv
+pymongo
+passlib[bcrypt]
+email-validator
+google-generativeai
