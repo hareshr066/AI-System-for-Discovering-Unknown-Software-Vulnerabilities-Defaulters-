@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
     Home,
     LayoutDashboard,
@@ -11,7 +11,11 @@ import {
     Settings,
     Menu,
     X,
-    User
+    User,
+    LogIn,
+    UserPlus,
+    LogOut,
+    BrainCircuit
 } from 'lucide-react';
 
 const navItems = [
@@ -26,7 +30,22 @@ const navItems = [
 
 const Navbar = () => {
     const location = useLocation();
+    const navigate = useNavigate();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [user, setUser] = useState(null);
+
+    useEffect(() => {
+        const userData = localStorage.getItem('user');
+        if (userData) {
+            setUser(JSON.parse(userData));
+        }
+    }, [location]);
+
+    const handleLogout = () => {
+        localStorage.removeItem('user');
+        setUser(null);
+        navigate('/login');
+    };
 
     const SettingsItem = { name: 'System Settings', path: '/settings', icon: Settings };
 
@@ -34,16 +53,14 @@ const Navbar = () => {
         // The container wrapper provides fixed positioning
         <div className="fixed top-0 inset-x-0 z-50 flex justify-center w-full px-4 sm:px-6 pt-4 sm:pt-6 pointer-events-none transition-all duration-300">
             {/* The actual navbar acting as a floating pill */}
-            <header 
+            <header
                 className="pointer-events-auto w-full max-w-[95%] 2xl:max-w-[1400px] h-16 bg-[rgba(15,23,42,0.85)] border border-[#1f2937] flex items-center justify-between shadow-[0_10px_40px_-5px_rgba(0,0,0,0.8)] rounded-full backdrop-blur-xl px-5 sm:px-8"
             >
                 {/* Left: Logo */}
                 <div className="flex flex-shrink-0 items-center">
-                    <Link to="/" className="flex items-center gap-3 transition-colors text-[#818CF8]">
-                        <div className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/20 shadow-[0_0_15px_rgba(99,102,241,0.2)]">
-                            <ShieldAlert className="w-5 h-5 md:w-6 md:h-6" />
-                        </div>
-                        <span className="text-lg md:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-100 to-indigo-200 tracking-wide drop-shadow-sm">
+                    <Link to="/" className="flex items-center gap-2 group transition-all duration-300">
+                        <BrainCircuit className="w-7 h-7 text-[#00F3FF] transition-all duration-300 group-hover:drop-shadow-[0_0_10px_#00F3FF]" />
+                        <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-[#00F3FF] tracking-tighter">
                             NexusScan
                         </span>
                     </Link>
@@ -54,7 +71,7 @@ const Navbar = () => {
                     {navItems.map((item) => {
                         const isActive = location.pathname === item.path ||
                             (item.path !== '/' && location.pathname.startsWith(item.path));
-                        
+
                         return (
                             <Link
                                 key={item.name}
@@ -75,20 +92,46 @@ const Navbar = () => {
                 </nav>
 
                 {/* Right: Settings & Hamburger */}
-                <div className="flex flex-shrink-0 items-center gap-1 sm:gap-3">
+                <div className="flex flex-shrink-0 items-center gap-2">
+                    {!user ? (
+                        <>
+                            <Link
+                                to="/login"
+                                className="hidden md:flex items-center gap-2 px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-800 rounded-full transition-all text-sm font-medium"
+                            >
+                                <LogIn className="w-4 h-4" />
+                                <span>Login</span>
+                            </Link>
+                            <Link
+                                to="/signup"
+                                className="hidden md:flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full transition-all text-sm font-medium"
+                            >
+                                <UserPlus className="w-4 h-4" />
+                                <span>Sign Up</span>
+                            </Link>
+                        </>
+                    ) : (
+                        <>
+                            <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-slate-800/50 rounded-full">
+                                <User className="w-4 h-4 text-indigo-400" />
+                                <span className="text-slate-200 text-sm font-medium">{user.username}</span>
+                            </div>
+                            <button
+                                onClick={handleLogout}
+                                className="hidden md:flex items-center gap-2 px-4 py-2 text-slate-300 hover:text-red-400 hover:bg-slate-800 rounded-full transition-all text-sm font-medium"
+                            >
+                                <LogOut className="w-4 h-4" />
+                                <span>Logout</span>
+                            </button>
+                        </>
+                    )}
                     <Link
                         to={SettingsItem.path}
-                        className="hidden md:flex p-2.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-full transition-all"
+                        className="hidden md:flex p-2.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-full transition-all ml-2"
                         title="System Settings"
                     >
                         <Settings className="w-5 h-5" />
                     </Link>
-                    <div 
-                        className="hidden md:flex items-center justify-center w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full text-white cursor-pointer hover:shadow-[0_0_20px_rgba(99,102,241,0.4)] transition-all border-2 border-slate-900 ml-2"
-                        title="User Profile"
-                    >
-                        <User className="w-5 h-5" />
-                    </div>
 
                     <button
                         className="xl:hidden p-2 text-slate-400 hover:text-white transition-colors bg-slate-800 rounded-lg ml-3"
@@ -106,17 +149,16 @@ const Navbar = () => {
                             const Icon = item.icon;
                             const isActive = location.pathname === item.path ||
                                 (item.path !== '/' && location.pathname.startsWith(item.path));
-                            
+
                             return (
                                 <Link
                                     key={item.name}
                                     to={item.path}
                                     onClick={() => setIsMenuOpen(false)}
-                                    className={`flex items-center gap-4 px-5 py-4 rounded-xl transition-all duration-200 ${
-                                        isActive
+                                    className={`flex items-center gap-4 px-5 py-4 rounded-xl transition-all duration-200 ${isActive
                                             ? 'bg-indigo-500/10 text-indigo-400 font-semibold border border-indigo-500/20'
                                             : 'text-slate-400 hover:bg-slate-800/80 hover:text-white border border-transparent'
-                                    }`}
+                                        }`}
                                 >
                                     <Icon className={`w-5 h-5 ${isActive ? 'text-indigo-400' : 'text-slate-500'}`} />
                                     <span>{item.name}</span>
@@ -124,14 +166,47 @@ const Navbar = () => {
                             );
                         })}
                         <div className="h-px bg-slate-800 my-4 w-full"></div>
+                        {!user ? (
+                            <>
+                                <Link
+                                    to="/login"
+                                    onClick={() => setIsMenuOpen(false)}
+                                    className="flex items-center gap-4 px-5 py-4 rounded-xl transition-all duration-200 text-slate-400 hover:bg-slate-800/80 hover:text-white border border-transparent"
+                                >
+                                    <LogIn className="w-5 h-5 text-slate-500" />
+                                    <span>Login</span>
+                                </Link>
+                                <Link
+                                    to="/signup"
+                                    onClick={() => setIsMenuOpen(false)}
+                                    className="flex items-center gap-4 px-5 py-4 rounded-xl transition-all duration-200 text-slate-400 hover:bg-slate-800/80 hover:text-white border border-transparent"
+                                >
+                                    <UserPlus className="w-5 h-5 text-slate-500" />
+                                    <span>Sign Up</span>
+                                </Link>
+                            </>
+                        ) : (
+                            <>
+                                <div className="flex items-center gap-4 px-5 py-4 text-slate-300">
+                                    <User className="w-5 h-5 text-slate-500" />
+                                    <span>{user.username}</span>
+                                </div>
+                                <button
+                                    onClick={() => { handleLogout(); setIsMenuOpen(false); }}
+                                    className="flex items-center gap-4 px-5 py-4 rounded-xl transition-all duration-200 text-slate-400 hover:bg-slate-800/80 hover:text-red-400 border border-transparent"
+                                >
+                                    <LogOut className="w-5 h-5 text-slate-500" />
+                                    <span>Logout</span>
+                                </button>
+                            </>
+                        )}
                         <Link
                             to={SettingsItem.path}
                             onClick={() => setIsMenuOpen(false)}
-                            className={`flex items-center gap-4 px-5 py-4 rounded-xl transition-all duration-200 ${
-                                location.pathname.startsWith(SettingsItem.path)
+                            className={`flex items-center gap-4 px-5 py-4 rounded-xl transition-all duration-200 ${location.pathname.startsWith(SettingsItem.path)
                                     ? 'bg-indigo-500/10 text-indigo-400 font-semibold border border-indigo-500/20'
                                     : 'text-slate-400 hover:bg-slate-800/80 hover:text-white border border-transparent'
-                            }`}
+                                }`}
                         >
                             <Settings className="w-5 h-5 text-slate-500" />
                             <span>System Settings</span>

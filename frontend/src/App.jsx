@@ -9,6 +9,8 @@ import Upload from './pages/Upload';
 import Scan from './pages/Scan';
 import Dashboard from './pages/Dashboard';
 import VulnerabilityDetail from './pages/VulnerabilityDetail';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
 
 import LiveScanMonitor from './pages/LiveScanMonitor';
 import VulnerabilityExplorer from './pages/VulnerabilityExplorer';
@@ -28,6 +30,8 @@ function AnimatedRoutes() {
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<PageTransition><Home /></PageTransition>} />
+        <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
+        <Route path="/signup" element={<PageTransition><Signup /></PageTransition>} />
         <Route path="/upload" element={<PageTransition><Upload /></PageTransition>} />
         <Route path="/scan" element={<PageTransition><Scan /></PageTransition>} />
         <Route path="/dashboard" element={<PageTransition><Dashboard /></PageTransition>} />

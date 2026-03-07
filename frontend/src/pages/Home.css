@@ -1,28 +1,34 @@
-.homepage-container {
+.homepage-container,
+.home-wrapper,
+.home-layout {
     background-color: #030305;
     color: #F3F4F6;
     font-family: 'Inter', system-ui, sans-serif;
     overflow-x: hidden;
     position: relative;
     min-height: 100vh;
+    /* Hide scrollbar for Firefox */
+    scrollbar-width: none;
+    /* Hide scrollbar for IE and Edge */
+    -ms-overflow-style: none;
 }
 
-/* Custom Scrollbar */
-.homepage-container::-webkit-scrollbar {
-    width: 6px;
+/* Hide scrollbar for Chrome, Safari and Opera */
+.homepage-container::-webkit-scrollbar,
+.home-wrapper::-webkit-scrollbar,
+.home-layout::-webkit-scrollbar {
+    display: none;
 }
 
-.homepage-container::-webkit-scrollbar-track {
-    background: #030305;
+/* Advanced: Target parent container scrollbar when homepage is active 
+   This ensures the main page scrollbar is hidden without global styles */
+*:has(.homepage-container) {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }
 
-.homepage-container::-webkit-scrollbar-thumb {
-    background: #1F1F2E;
-    border-radius: 3px;
-}
-
-.homepage-container::-webkit-scrollbar-thumb:hover {
-    background: #00F3FF;
+*:has(.homepage-container)::-webkit-scrollbar {
+    display: none;
 }
 
 /* Typography & Colors */
@@ -52,7 +58,7 @@
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
+    width: 100%;
     height: 100vh;
     background-image:
         linear-gradient(to right, rgba(0, 243, 255, 0.03) 1px, transparent 1px),
@@ -115,6 +121,20 @@
 }
 
 /* Hero & Section Layout */
+.hero-title {
+    font-size: clamp(2rem, 8vw, 5.5rem);
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 1.05;
+    text-align: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    color: #F3F4F6;
+    z-index: 10;
+    position: relative;
+    padding: 0 1rem;
+}
+
 .home-hero {
     position: relative;
     min-height: 100vh;
@@ -163,6 +183,7 @@
     background: linear-gradient(to right, #00F3FF, #BC13FE, #00F3FF);
     background-size: 200% auto;
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
     filter: drop-shadow(0 0 20px rgba(0, 243, 255, 0.6));
     display: inline-block;
