@@ -72,9 +72,9 @@ const Footer = ({ className = "" }) => {
                     &copy; {new Date().getFullYear()} VulnScanner. All rights reserved.
                 </p>
                 <div className="flex gap-6 text-sm">
-                    <a href="#" className="text-slate-500 hover:text-slate-300 transition-colors">Privacy Policy</a>
-                    <a href="#" className="text-slate-500 hover:text-slate-300 transition-colors">Terms of Service</a>
-                    <a href="#" className="text-slate-500 hover:text-slate-300 transition-colors">Security</a>
+                    <Link to="/privacy-policy" className="text-emerald-500/70 hover:text-emerald-400 transition-colors">Privacy Policy</Link>
+                    <Link to="/terms-of-service" className="text-emerald-500/70 hover:text-emerald-400 transition-colors">Terms of Service</Link>
+                    <Link to="/security" className="text-emerald-500/70 hover:text-emerald-400 transition-colors">Security</Link>
                 </div>
             </div>
         </footer>

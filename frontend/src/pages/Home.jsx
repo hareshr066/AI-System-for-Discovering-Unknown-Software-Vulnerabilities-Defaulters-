@@ -224,42 +224,178 @@ const CinematicBackground = ({ mouseX, mouseY }) => {
    HERO TYPEWRITER
 ───────────────────────────────────────────────── */
 const HeroTypewriter = () => {
-  const prefix = 'Autonomous AI System for Discovering ';
-  const [display, setDisplay] = useState('');
-  const [done, setDone] = useState(false);
+  const fullText = "Discovering and Resolving Software Vulnerabilities with Autonomous AI";
+  const [text, setText] = useState("");
+  const [complete, setComplete] = useState(false);
 
   useEffect(() => {
-    let i = 0;
-    const id = setInterval(() => {
-      setDisplay(prefix.slice(0, i + 1));
-      i++;
-      if (i >= prefix.length) { clearInterval(id); setTimeout(() => setDone(true), 300); }
-    }, 38);
-    return () => clearInterval(id);
+    let current = 0;
+    const interval = setInterval(() => {
+      setText(fullText.slice(0, current + 1));
+      current++;
+      if (current >= fullText.length) {
+        clearInterval(interval);
+        setComplete(true);
+      }
+    }, 45);
+    return () => clearInterval(interval);
+  }, []);
+
+  const resolvingStart = 16;
+  const resolvingEnd = 25;
+
+  return (
+    <h1 className="hero-title">
+      <span className="text-[#F3F4F6]">{text.slice(0, resolvingStart)}</span>
+      <span className="home-glow-text">{text.slice(resolvingStart, resolvingEnd)}</span>
+      <span className="text-[#CBD5E1]">{text.slice(resolvingEnd)}</span>
+      <span className="home-typewriter-cursor" />
+    </h1>
+  );
+};
+
+/* ─────────────────────────────────────────────────
+   AI SCAN VISUALIZATION (Scene 2)
+───────────────────────────────────────────────── */
+const AIScanVisualization = () => {
+  const [step, setStep] = useState(0);
+
+  useEffect(() => {
+    const sequence = async () => {
+      let currentStep = 0;
+      const timings = [1500, 3000, 2000, 2000, 2500];
+      while (true) {
+        setStep(currentStep);
+        await new Promise(r => setTimeout(r, timings[currentStep]));
+        currentStep = (currentStep + 1) % 5;
+      }
+    };
+    sequence();
   }, []);
 
   return (
-    <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black tracking-tighter leading-[1.05] text-center max-w-6xl">
-      <span className="text-[#F3F4F6]">{display}</span>
-      {done && (
-        <motion.span className="home-glow-text"
-          initial={{ opacity: 0, scale: 0.6, filter: 'blur(12px)' }}
-          animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-          transition={{ duration: 0.9, type: 'spring', bounce: 0.4 }}>
-          Unknown
-        </motion.span>
-      )}
-      <br />
-      {done && (
-        <motion.span className="text-[#CBD5E1]"
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.2 }}>
-          Software Vulnerabilities
-        </motion.span>
-      )}
-      {!done && <span className="home-typewriter-cursor" />}
-    </h1>
+    <div className="w-full py-12 flex flex-col items-center justify-center">
+      <div className="mb-10 text-center">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#00F3FF]/30 bg-[#00F3FF]/5 text-[#00F3FF] text-[10px] font-black uppercase tracking-widest mb-4">
+          <Activity size={12} className={step === 1 ? "animate-pulse" : ""} />
+          {step === 0 && "System Ready"}
+          {step === 1 && "Autonomous Scanning..."}
+          {step === 2 && "Vulnerability Identified"}
+          {step === 3 && "Applying Neural Patch"}
+          {step === 4 && "Threat Resolved"}
+        </div>
+        <h2 className="text-3xl md:text-4xl font-black text-white tracking-tight">AI Vulnerability Detection</h2>
+      </div>
+
+      <div className="w-full max-w-3xl home-panel-glass p-0 overflow-hidden relative border-[#00F3FF]/10 shadow-2xl">
+        <AnimatePresence>
+          {step === 1 && (
+            <motion.div
+              initial={{ top: "-5%" }}
+              animate={{ top: "105%" }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 2.5, repeat: Infinity, ease: "linear" }}
+              className="absolute left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-[#00F3FF] to-transparent z-40"
+              style={{ boxShadow: '0 0 20px #00F3FF, 0 0 40px rgba(0,243,255,0.5)' }}
+            />
+          )}
+        </AnimatePresence>
+
+        <div className="p-8 font-mono text-sm md:text-base bg-[#030305]/80 backdrop-blur-md">
+          <div className="flex items-center gap-2 mb-6 opacity-40">
+            <div className="w-3 h-3 rounded-full bg-[#FF003C]" />
+            <div className="w-3 h-3 rounded-full bg-[#EAB308]" />
+            <div className="w-3 h-3 rounded-full bg-[#22C55E]" />
+            <span className="text-xs ml-2 text-[#64748B]">core_engine.c — Memory Monitor</span>
+          </div>
+
+          <div className="space-y-2 text-[#94A3B8]">
+            <div className="flex gap-4">
+              <span className="text-[#334155] w-6">24</span>
+              <span><span className="text-[#BC13FE]">void*</span> <span className="text-[#00F3FF]">alloc_secure</span>(size_t size) {"{"}</span>
+            </div>
+            <div className="flex gap-4 border-l-2 border-transparent">
+              <span className="text-[#334155] w-6">25</span>
+              <span className="pl-4"><span className="text-[#BC13FE]">char</span> *ptr = <span className="text-[#00F3FF]">malloc</span>(size);</span>
+            </div>
+
+            <motion.div
+              className="flex gap-4 relative"
+              animate={{
+                backgroundColor: step === 2 ? "rgba(255,0,60,0.15)" : step >= 3 ? "rgba(0,255,102,0.05)" : "transparent",
+              }}
+              transition={{ duration: 0.5 }}
+            >
+              <span className="text-[#334155] w-6 relative z-10">26</span>
+              <div className="pl-4 relative z-10 flex flex-wrap items-center gap-x-2">
+                {step < 3 ? (
+                  <span className={step === 2 ? "text-[#FF003C] font-bold" : ""}>
+                    <span className="text-[#BC13FE]">strcpy</span>(ptr, source_data); <span className="text-[#475569]">// Critical: No bounds check</span>
+                  </span>
+                ) : (
+                  <span className="text-[#00FF66] font-bold transition-all duration-500">
+                    <span className="text-[#BC13FE]">strncpy</span>(ptr, source_data, size); <span className="text-[#475569]">// Neural Patch Applied</span>
+                  </span>
+                )}
+
+                <AnimatePresence>
+                  {step === 2 && (
+                    <motion.span
+                      initial={{ scale: 0, x: -20, opacity: 0 }}
+                      animate={{ scale: 1, x: 0, opacity: 1 }}
+                      exit={{ scale: 0, y: -20, opacity: 0 }}
+                      className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-[#FF003C] text-white text-[10px] rounded font-black tracking-tighter shadow-[0_0_15px_#FF003C]"
+                    >
+                      <Bug size={10} className="animate-bounce" /> BUFFER_OVERFLOW
+                    </motion.span>
+                  )}
+                  {step === 4 && (
+                    <motion.span
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-[#00FF66] text-[#030305] text-[10px] rounded font-black tracking-tighter shadow-[0_0_15px_#00FF66]"
+                    >
+                      <CheckCircle size={10} /> VALIDATED
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </div>
+            </motion.div>
+
+            <div className="flex gap-4">
+              <span className="text-[#334155] w-6">27</span>
+              <span className="pl-4"><span className="text-[#BC13FE]">return</span> ptr;</span>
+            </div>
+            <div className="flex gap-4">
+              <span className="text-[#334155] w-6">28</span>
+              <span>{"}"}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="border-t border-[#1E293B] bg-[#030305] p-6 flex justify-between items-center px-12">
+          {[
+            { label: 'Ingestion', active: step >= 0, col: '#00F3FF' },
+            { label: 'Scanning', active: step >= 1, col: '#00F3FF' },
+            { label: 'Analysis', active: step >= 2, col: '#FF003C' },
+            { label: 'Patching', active: step >= 3, col: '#BC13FE' },
+            { label: 'Success', active: step >= 4, col: '#00FF66' },
+          ].map((t, i) => (
+            <div key={i} className="flex flex-col items-center gap-2">
+              <motion.div
+                animate={{
+                  backgroundColor: t.active ? t.col : "transparent",
+                  borderColor: t.active ? t.col : "#1E293B",
+                  boxShadow: t.active ? `0 0 15px ${t.col}` : "none"
+                }}
+                className="w-2.5 h-2.5 rounded-full border-2 transition-all duration-500"
+              />
+              <span className="text-[9px] font-black uppercase tracking-widest text-[#475569]">{t.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 };
 
@@ -411,13 +547,11 @@ const Home = () => {
         </motion.div>
       </motion.div>
 
-      {/* ── SCENE 2: STATS BAR ── */}
+      {/* ── SCENE 2: AI SCAN ANIMATION ── */}
       <div className="relative z-30 border-y border-[#0F172A]"
         style={{ background: 'rgba(3,3,5,0.92)', backdropFilter: 'blur(30px)' }}>
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-around divide-y md:divide-y-0 md:divide-x divide-[#0F172A]">
-          <AnimatedCounter end={1200} suffix="+" label="Programs Assessed" />
-          <AnimatedCounter end={86} label="Zero-Days Isolated" />
-          <AnimatedCounter end={99} suffix="%" label="Autonomous Patch Rate" />
+        <div className="max-w-6xl mx-auto">
+          <AIScanVisualization />
         </div>
       </div>
 
