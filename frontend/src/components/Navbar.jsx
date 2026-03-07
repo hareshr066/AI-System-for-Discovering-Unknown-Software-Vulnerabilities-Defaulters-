@@ -25,7 +25,6 @@ const navItems = [
     { name: 'Vulnerability Explorer', path: '/vulnerabilities', icon: Shield },
     { name: 'Threat Intelligence', path: '/threat-intelligence', icon: ShieldAlert },
     { name: 'Scan History', path: '/history', icon: History },
-    { name: 'Security Reports', path: '/reports', icon: FileText },
 ];
 
 const Navbar = () => {
@@ -125,13 +124,7 @@ const Navbar = () => {
                             </button>
                         </>
                     )}
-                    <Link
-                        to={SettingsItem.path}
-                        className="hidden md:flex p-2.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-full transition-all ml-2"
-                        title="System Settings"
-                    >
-                        <Settings className="w-5 h-5" />
-                    </Link>
+
 
                     <button
                         className="xl:hidden p-2 text-slate-400 hover:text-white transition-colors bg-slate-800 rounded-lg ml-3"
@@ -200,17 +193,7 @@ const Navbar = () => {
                                 </button>
                             </>
                         )}
-                        <Link
-                            to={SettingsItem.path}
-                            onClick={() => setIsMenuOpen(false)}
-                            className={`flex items-center gap-4 px-5 py-4 rounded-xl transition-all duration-200 ${location.pathname.startsWith(SettingsItem.path)
-                                    ? 'bg-indigo-500/10 text-indigo-400 font-semibold border border-indigo-500/20'
-                                    : 'text-slate-400 hover:bg-slate-800/80 hover:text-white border border-transparent'
-                                }`}
-                        >
-                            <Settings className="w-5 h-5 text-slate-500" />
-                            <span>System Settings</span>
-                        </Link>
+
                     </div>
                 )}
             </header>
